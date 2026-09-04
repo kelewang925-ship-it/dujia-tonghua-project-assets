@@ -1,0 +1,1335 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="《独家童话》项目品牌、产品结构、设计模块与页面功能全景展示。">
+  <title>独家童话 | 项目全景</title>
+  <style>
+    :root {
+      --paper: #f8f6f2;
+      --paper-warm: #f2e8dc;
+      --paper-deep: #ead9cc;
+      --peach: #f6bec8;
+      --peach-soft: #f8d9dd;
+      --rose: #b08a8f;
+      --rose-deep: #8d666c;
+      --cocoa: #6b4f4f;
+      --cocoa-deep: #4b3436;
+      --gold: #d8b384;
+      --gold-pale: #ead5ad;
+      --ink-soft: #8c7472;
+      --line: rgba(107, 79, 79, .16);
+      --line-strong: rgba(107, 79, 79, .28);
+      --surface: rgba(255, 253, 249, .78);
+      --shadow-soft: 0 18px 55px rgba(107, 79, 79, .10);
+      --shadow-paper: 0 26px 70px rgba(91, 58, 58, .15), 0 2px 7px rgba(91, 58, 58, .08);
+      --radius-sm: 14px;
+      --radius-md: 24px;
+      --radius-lg: 36px;
+      --content: 1180px;
+      --serif: "Iowan Old Style", "Songti SC", "STSong", "Noto Serif CJK SC", Georgia, serif;
+      --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 84px;
+      background: var(--paper);
+    }
+
+    body {
+      margin: 0;
+      color: var(--cocoa);
+      background:
+        radial-gradient(circle at 8% 6%, rgba(246, 190, 200, .24), transparent 24rem),
+        radial-gradient(circle at 92% 20%, rgba(216, 179, 132, .14), transparent 26rem),
+        linear-gradient(180deg, #fbf8f3 0%, var(--paper) 48%, #f3ebe2 100%);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      content: "";
+      pointer-events: none;
+      opacity: .28;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(107, 79, 79, .018) 0, rgba(107, 79, 79, .018) 1px, transparent 1px, transparent 4px),
+        repeating-linear-gradient(90deg, rgba(216, 179, 132, .018) 0, rgba(216, 179, 132, .018) 1px, transparent 1px, transparent 5px);
+    }
+
+    img { display: block; max-width: 100%; }
+    figure { margin: 0; }
+    button, a { font: inherit; }
+    button { color: inherit; }
+
+    a {
+      color: var(--cocoa);
+      text-decoration-color: var(--gold);
+      text-underline-offset: .28em;
+    }
+
+    a:hover { color: var(--rose-deep); }
+
+    :focus-visible {
+      outline: 3px solid rgba(176, 138, 143, .72);
+      outline-offset: 4px;
+    }
+
+    body > a:first-child {
+      position: fixed;
+      z-index: 100;
+      top: 12px;
+      left: 12px;
+      padding: 10px 15px;
+      border-radius: 10px;
+      color: #fff;
+      background: var(--cocoa-deep);
+      transform: translateY(-180%);
+      transition: transform .2s ease;
+    }
+
+    body > a:first-child:focus { transform: translateY(0); }
+
+    body > nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: center;
+      gap: clamp(14px, 2.7vw, 38px);
+      min-height: 68px;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(248, 246, 242, .82);
+      backdrop-filter: blur(20px) saturate(130%);
+      -webkit-backdrop-filter: blur(20px) saturate(130%);
+    }
+
+    body > nav a {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      color: var(--ink-soft);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    body > nav a::after {
+      position: absolute;
+      right: 0;
+      bottom: 13px;
+      left: 0;
+      height: 2px;
+      border-radius: 99px;
+      content: "";
+      background: var(--rose);
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform .2s ease;
+    }
+
+    body > nav a:hover::after,
+    body > nav a[aria-current="true"]::after { transform: scaleX(1); }
+
+    main > section {
+      width: min(var(--content), calc(100% - 48px));
+      margin-inline: auto;
+      padding-block: clamp(80px, 10vw, 150px);
+    }
+
+    main > section + section { border-top: 1px solid var(--line); }
+
+    section > header {
+      max-width: 760px;
+      margin-bottom: clamp(42px, 6vw, 76px);
+    }
+
+    section > header > p:first-child,
+    #project > div > p:first-child,
+    #product > div > header > p:first-child,
+    main > section:last-of-type > header > p:first-child {
+      margin: 0 0 12px;
+      color: var(--rose-deep);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .18em;
+    }
+
+    h1, h2, h3, h4, p { margin-top: 0; }
+
+    h1, h2, h3 {
+      font-family: var(--serif);
+      font-weight: 700;
+      letter-spacing: -.035em;
+    }
+
+    h1 {
+      margin-bottom: 18px;
+      color: var(--cocoa-deep);
+      font-size: clamp(64px, 10vw, 132px);
+      line-height: .92;
+    }
+
+    h2 {
+      max-width: 760px;
+      margin-bottom: 20px;
+      color: var(--cocoa-deep);
+      font-size: clamp(38px, 5.4vw, 72px);
+      line-height: 1.06;
+    }
+
+    h3 { color: var(--cocoa-deep); }
+
+    section > header > p:last-child {
+      max-width: 680px;
+      margin-bottom: 0;
+      color: var(--ink-soft);
+      font-size: clamp(16px, 1.5vw, 19px);
+    }
+
+    #project {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(330px, .92fr);
+      align-items: center;
+      gap: clamp(46px, 7vw, 100px);
+      min-height: calc(100dvh - 68px);
+      padding-top: clamp(54px, 7vw, 96px);
+    }
+
+    #project > div > p:nth-of-type(2) {
+      max-width: 720px;
+      margin-bottom: 20px;
+      color: var(--rose-deep);
+      font-family: var(--serif);
+      font-size: clamp(24px, 3vw, 40px);
+      line-height: 1.35;
+    }
+
+    #project > div > p:nth-of-type(3) {
+      max-width: 650px;
+      margin-bottom: 42px;
+      color: var(--ink-soft);
+      font-size: clamp(16px, 1.5vw, 19px);
+    }
+
+    #project > div > div {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      border-top: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    #project > div > div article {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 20px 12px 20px 0;
+    }
+
+    #project > div > div article + article {
+      padding-left: 18px;
+      border-left: 1px solid var(--line);
+    }
+
+    #project > div > div strong {
+      color: var(--cocoa-deep);
+      font-family: var(--serif);
+      font-size: clamp(25px, 2.6vw, 38px);
+      line-height: 1;
+    }
+
+    #project > div > div span { color: var(--ink-soft); font-size: 12px; }
+
+    #project > figure {
+      position: relative;
+      isolation: isolate;
+      padding: clamp(16px, 2vw, 24px);
+      border: 1px solid rgba(216, 179, 132, .48);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 249, .64);
+      box-shadow: var(--shadow-paper);
+      transform: rotate(1.5deg);
+    }
+
+    #project > figure::before {
+      position: absolute;
+      z-index: -1;
+      inset: -28px 34px 34px -34px;
+      border: 1px solid rgba(176, 138, 143, .26);
+      border-radius: inherit;
+      content: "";
+      transform: rotate(-4deg);
+    }
+
+    #project > figure img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: contain; object-position: center; border-radius: calc(var(--radius-lg) - 10px); }
+    #project > figure figcaption { padding: 15px 6px 1px; color: var(--ink-soft); font-size: 13px; }
+
+    #product > ol {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      margin: 0 0 clamp(90px, 12vw, 150px);
+      padding: 0;
+      list-style: none;
+      border-block: 1px solid var(--line-strong);
+    }
+
+    #product > ol li { min-height: 250px; padding: 28px 26px 32px 0; }
+    #product > ol li + li { padding-left: 26px; border-left: 1px solid var(--line); }
+    #product > ol span { color: var(--gold); font-family: var(--serif); font-size: 16px; }
+    #product > ol h3 { margin: 68px 0 12px; font-size: 29px; }
+    #product > ol p { margin-bottom: 0; color: var(--ink-soft); font-size: 14px; }
+
+    #product > div {
+      display: grid;
+      grid-template-columns: minmax(260px, .78fr) minmax(0, 1.22fr);
+      gap: clamp(50px, 8vw, 110px);
+      align-items: center;
+    }
+
+    #product > div > header h3 { margin: 0 0 18px; font-size: clamp(32px, 4vw, 54px); line-height: 1.08; }
+    #product > div > header p:last-child { color: var(--ink-soft); }
+
+    #product > div > div {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      padding: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 249, .46);
+    }
+
+    #product > div > div::before {
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: 105px;
+      aspect-ratio: 1;
+      border: 1px solid rgba(216, 179, 132, .7);
+      border-radius: 50%;
+      content: "双人\A故事";
+      white-space: pre;
+      display: grid;
+      place-items: center;
+      color: var(--rose-deep);
+      background: var(--paper);
+      font-family: var(--serif);
+      font-weight: 700;
+      line-height: 1.2;
+      text-align: center;
+      transform: translate(-50%, -50%);
+    }
+
+    #product > div article {
+      min-height: 190px;
+      padding: 24px;
+      border-radius: var(--radius-md);
+      background: rgba(246, 190, 200, .18);
+    }
+
+    #product > div article:nth-child(2),
+    #product > div article:nth-child(3) { background: rgba(216, 179, 132, .16); }
+    #product > div article span { color: var(--rose-deep); font-size: 13px; font-weight: 800; }
+    #product > div article h4 { margin: 30px 0 8px; color: var(--cocoa-deep); font-family: var(--serif); font-size: 21px; }
+    #product > div article p { margin: 0; color: var(--ink-soft); font-size: 13px; }
+
+    #modules > div { display: grid; gap: clamp(70px, 9vw, 126px); }
+
+    #modules > div > article {
+      display: grid;
+      grid-template-columns: minmax(0, .88fr) minmax(320px, 1.12fr);
+      grid-template-areas:
+        "meta image"
+        "title image"
+        "copy image"
+        "list image"
+        "link image";
+      column-gap: clamp(48px, 7vw, 96px);
+      align-items: start;
+      padding-top: 34px;
+      border-top: 1px solid var(--line-strong);
+    }
+
+    #modules > div > article:nth-child(even) {
+      grid-template-columns: minmax(320px, 1.12fr) minmax(0, .88fr);
+      grid-template-areas:
+        "image meta"
+        "image title"
+        "image copy"
+        "image list"
+        "image link";
+    }
+
+    #modules article > div { grid-area: meta; display: flex; justify-content: space-between; color: var(--ink-soft); font-size: 13px; }
+    #modules article > div span:first-child { color: var(--gold); font-family: var(--serif); font-size: 19px; }
+    #modules article > h3 { grid-area: title; margin: 45px 0 16px; font-size: clamp(36px, 4vw, 56px); line-height: 1; }
+    #modules article > p { grid-area: copy; color: var(--ink-soft); }
+    #modules article > ul { grid-area: list; display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 32px; padding: 0; list-style: none; }
+    #modules article > ul li { padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--rose-deep); font-size: 12px; }
+    #modules article > figure { grid-area: image; position: relative; overflow: hidden; border-radius: var(--radius-md); background: var(--paper-warm); box-shadow: var(--shadow-soft); }
+    #modules article > figure::after { position: absolute; inset: 0; content: ""; box-shadow: inset 0 0 0 1px rgba(255,255,255,.45); pointer-events: none; }
+    #modules article > figure img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: top; }
+    #modules article > figure figcaption { position: absolute; right: 14px; bottom: 14px; padding: 7px 11px; border-radius: 10px; color: var(--cocoa); background: rgba(248,246,242,.88); backdrop-filter: blur(9px); font-size: 12px; }
+    #modules article > a { grid-area: link; justify-self: start; font-size: 14px; font-weight: 700; }
+
+    #journey > ol {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      margin: 0 0 70px;
+      padding: 0;
+      list-style: none;
+      border-top: 1px solid var(--line-strong);
+    }
+
+    #journey > ol li { position: relative; padding: 28px 24px 25px 0; }
+    #journey > ol li + li { padding-left: 24px; }
+    #journey > ol li::before { position: absolute; top: -5px; left: 0; width: 9px; height: 9px; border-radius: 50%; content: ""; background: var(--gold); }
+    #journey > ol li + li::before { left: 24px; }
+    #journey > ol span { color: var(--gold); font-family: var(--serif); }
+    #journey > ol strong { display: block; margin: 28px 0 8px; color: var(--cocoa-deep); font-family: var(--serif); font-size: 18px; }
+    #journey > ol p { margin: 0; color: var(--ink-soft); font-size: 13px; }
+
+    #journey > figure { padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: rgba(255,253,249,.58); box-shadow: var(--shadow-soft); }
+    .journey-viewer__toolbar { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .journey-viewer__toolbar button { min-width: 44px; padding: 8px 13px; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; color: var(--cocoa); background: rgba(255,253,249,.9); font-weight: 700; }
+    .journey-viewer__toolbar button:hover { border-color: var(--rose); color: var(--rose-deep); }
+    .journey-viewer__toolbar button:active { transform: translateY(1px); }
+    .journey-viewer__toolbar button:disabled { cursor: not-allowed; opacity: .42; }
+    .journey-viewer__toolbar output { min-width: 62px; color: var(--rose-deep); font-variant-numeric: tabular-nums; font-weight: 800; text-align: center; }
+    .journey-viewer__viewport { max-height: min(72dvh, 880px); overflow: auto; border-radius: calc(var(--radius-lg) - 10px); background: var(--paper-warm); cursor: grab; overscroll-behavior: contain; scrollbar-color: var(--rose) var(--paper-warm); }
+    .journey-viewer__viewport.is-dragging { cursor: grabbing; user-select: none; }
+    .journey-viewer__viewport img { width: 100%; max-width: none; height: auto; user-select: none; -webkit-user-drag: none; }
+    #journey > figure figcaption { padding: 15px 10px 1px; color: var(--ink-soft); font-size: 13px; }
+
+    #gallery > div:nth-of-type(1) {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+
+    #gallery > div:nth-of-type(1) button {
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      cursor: pointer;
+      background: rgba(255,253,249,.55);
+      transition: color .2s ease, background .2s ease, border-color .2s ease;
+    }
+
+    #gallery > div:nth-of-type(1) button:hover,
+    #gallery > div:nth-of-type(1) button[aria-pressed="true"] { color: #fff; border-color: var(--cocoa); background: var(--cocoa); }
+    #gallery > div:nth-of-type(1) output { margin-left: auto; align-self: center; color: var(--rose-deep); font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+    #gallery > div:nth-of-type(2) {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 26px 18px;
+    }
+
+    #gallery figure { min-width: 0; }
+    #gallery figure[hidden] { display: none; }
+    #gallery figure button { display: block; width: 100%; padding: 0; overflow: hidden; border: 0; border-radius: var(--radius-md); cursor: zoom-in; background: var(--paper-warm); box-shadow: 0 12px 34px rgba(107,79,79,.08); }
+    #gallery figure img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: top; transition: transform .35s ease; }
+    #gallery figure button:hover img { transform: scale(1.025); }
+    #gallery figure figcaption { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 13px 4px 0; }
+    #gallery figure figcaption span { color: var(--rose-deep); font-size: 11px; }
+    #gallery figure figcaption strong { color: var(--cocoa-deep); font-family: var(--serif); font-size: 15px; text-align: right; }
+
+    #gallery + section > div { border-top: 1px solid var(--line-strong); }
+    #gallery + section article { border-bottom: 1px solid var(--line); }
+    #gallery + section article > button { display: flex; width: 100%; justify-content: space-between; padding: 25px 0; border: 0; cursor: pointer; color: var(--cocoa-deep); background: transparent; font-family: var(--serif); font-size: clamp(21px, 2.2vw, 29px); text-align: left; }
+    #gallery + section article > button::after { content: "+"; color: var(--gold); font-family: var(--sans); font-weight: 300; }
+    #gallery + section article > button[aria-expanded="true"]::after { content: "−"; }
+    #gallery + section article > div { max-width: 760px; padding: 0 0 30px; color: var(--ink-soft); }
+    #gallery + section article > div[hidden] { display: none; }
+    #gallery + section article ul { padding-left: 1.25em; }
+
+    #design-system > div:first-of-type {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-bottom: 70px;
+    }
+
+    #design-system > div:first-of-type figure { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-sm); background: rgba(255,253,249,.64); }
+    #design-system > div:first-of-type figure > span { display: block; height: 145px; border-bottom: 1px solid var(--line); }
+    #design-system > div:first-of-type figcaption { display: grid; gap: 2px; padding: 14px; }
+    #design-system code { color: var(--ink-soft); font-size: 11px; }
+    #design-system > div:last-of-type { display: grid; grid-template-columns: 1.15fr .85fr; gap: 18px; }
+    #design-system > div:last-of-type article { min-height: 230px; padding: clamp(28px, 4vw, 48px); border-radius: var(--radius-md); background: rgba(246,190,200,.2); }
+    #design-system > div:last-of-type article:last-child { background: rgba(107,79,79,.08); }
+    #design-system > div:last-of-type h3 { font-size: 29px; }
+    #design-system > div:last-of-type p { max-width: 560px; margin: 55px 0 0; color: var(--ink-soft); }
+
+    #status > div { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line-strong); }
+    #status article { min-height: 250px; padding: 34px 38px 34px 0; border-bottom: 1px solid var(--line); }
+    #status article:nth-child(even) { padding-left: 38px; border-left: 1px solid var(--line); }
+    #status article > span { display: inline-block; padding: 5px 9px; border-radius: 8px; color: var(--rose-deep); background: rgba(246,190,200,.24); font-size: 11px; font-weight: 800; }
+    #status article h3 { margin: 58px 0 12px; font-size: 25px; }
+    #status article p { margin: 0; color: var(--ink-soft); }
+
+    main > section:last-of-type nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--line-strong); }
+    main > section:last-of-type nav a { min-height: 110px; padding: 24px 20px 24px 0; border-bottom: 1px solid var(--line); font-family: var(--serif); font-size: 18px; font-weight: 700; text-decoration: none; }
+    main > section:last-of-type nav a:not(:nth-child(4n + 1)) { padding-left: 20px; border-left: 1px solid var(--line); }
+
+    body > footer { padding: 36px 24px; color: rgba(248,246,242,.82); background: var(--cocoa-deep); text-align: center; }
+    body > footer p { margin: 0; font-family: var(--serif); }
+
+    body.modal-open { overflow: hidden; }
+
+    .lightbox[hidden] { display: none; }
+
+    .lightbox {
+      position: fixed;
+      z-index: 100;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .lightbox__backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(55, 37, 39, .78);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .lightbox__panel {
+      position: relative;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      width: min(1180px, 100%);
+      max-height: calc(100dvh - 48px);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .34);
+      border-radius: var(--radius-lg);
+      background: var(--paper);
+      box-shadow: 0 34px 100px rgba(32, 18, 20, .35);
+    }
+
+    .lightbox__panel > header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .lightbox__panel > header p { margin: 0 0 2px; color: var(--rose-deep); font-size: 11px; font-weight: 800; letter-spacing: .12em; }
+    .lightbox__panel > header h2 { margin: 0; font-size: clamp(22px, 3vw, 34px); }
+
+    .lightbox__close,
+    .lightbox__move {
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      cursor: pointer;
+      background: rgba(255, 253, 249, .82);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .lightbox__close { padding: 10px 16px; }
+
+    .lightbox__stage {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 18px;
+      min-height: 0;
+      padding: 18px;
+      background: var(--paper-warm);
+    }
+
+    .lightbox__stage figure { min-height: 0; text-align: center; }
+    .lightbox__stage img { width: auto; max-width: 100%; height: min(70dvh, 900px); margin-inline: auto; object-fit: contain; border-radius: var(--radius-sm); box-shadow: var(--shadow-paper); }
+    .lightbox__stage figcaption { padding-top: 10px; color: var(--ink-soft); font-size: 11px; overflow-wrap: anywhere; }
+    .lightbox__move { width: 58px; height: 58px; padding: 0; }
+    .lightbox__move:hover, .lightbox__close:hover { color: #fff; border-color: var(--cocoa); background: var(--cocoa); }
+
+    .image-error {
+      display: grid;
+      place-items: center;
+      min-height: 240px;
+      padding: 24px;
+      color: var(--rose-deep);
+      background: var(--paper-warm);
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      #project { grid-template-columns: 1fr; min-height: auto; }
+      #project > figure { width: min(620px, 90%); margin-inline: auto; }
+      #product > ol { grid-template-columns: 1fr 1fr; }
+      #product > ol li:nth-child(3) { border-left: 0; }
+      #product > ol li:nth-child(n + 3) { border-top: 1px solid var(--line); }
+      #product > div { grid-template-columns: 1fr; }
+      #modules > div > article,
+      #modules > div > article:nth-child(even) {
+        grid-template-columns: minmax(0, .9fr) minmax(300px, 1.1fr);
+        grid-template-areas:
+          "meta image"
+          "title image"
+          "copy image"
+          "list image"
+          "link image";
+      }
+      #journey > ol { grid-template-columns: repeat(3, 1fr); }
+      #design-system > div:first-of-type { grid-template-columns: repeat(3, 1fr); }
+      main > section:last-of-type nav { grid-template-columns: repeat(2, 1fr); }
+      main > section:last-of-type nav a:not(:nth-child(4n + 1)) { padding-left: 0; border-left: 0; }
+      main > section:last-of-type nav a:nth-child(even) { padding-left: 20px; border-left: 1px solid var(--line); }
+    }
+
+    @media (max-width: 760px) {
+      html { scroll-padding-top: 64px; }
+      body { font-size: 15px; }
+      body > nav { justify-content: flex-start; min-height: 60px; padding-inline: 16px; overflow-x: auto; scrollbar-width: none; }
+      body > nav::-webkit-scrollbar { display: none; }
+      body > nav a::after { bottom: 10px; }
+      main > section { width: min(100% - 32px, var(--content)); padding-block: 78px; }
+      #project { min-height: auto; padding-top: 50px; }
+      h1 { font-size: clamp(58px, 20vw, 88px); }
+      h2 { font-size: clamp(35px, 11vw, 52px); }
+      #project > div > div { grid-template-columns: 1fr 1fr; }
+      #project > div > div article:nth-child(3) { padding-left: 0; border-top: 1px solid var(--line); border-left: 0; }
+      #project > div > div article:nth-child(4) { border-top: 1px solid var(--line); }
+      #project > figure { width: 100%; transform: none; }
+      #project > figure::before { display: none; }
+      #product > ol { grid-template-columns: 1fr; }
+      #product > ol li,
+      #product > ol li + li { min-height: auto; padding: 26px 0; border-left: 0; }
+      #product > ol li + li { border-top: 1px solid var(--line); }
+      #product > ol h3 { margin-top: 34px; }
+      #product > div > div { padding: 15px; gap: 10px; }
+      #product > div > div::before { width: 76px; font-size: 13px; }
+      #product > div article { min-height: 170px; padding: 18px; }
+      #product > div article h4 { margin-top: 26px; }
+      #modules > div { gap: 82px; }
+      #modules > div > article,
+      #modules > div > article:nth-child(even) {
+        grid-template-columns: 1fr;
+        grid-template-areas: "meta" "title" "copy" "list" "image" "link";
+      }
+      #modules article > h3 { margin-top: 30px; }
+      #modules article > figure { margin: 18px 0 24px; }
+      #journey > ol { grid-template-columns: 1fr; border-top: 0; border-left: 1px solid var(--line-strong); }
+      #journey > ol li,
+      #journey > ol li + li { padding: 0 0 30px 28px; }
+      #journey > ol li::before,
+      #journey > ol li + li::before { top: 4px; left: -5px; }
+      #journey > ol strong { margin-top: 14px; }
+      #journey > figure { padding: 8px; border-radius: var(--radius-md); }
+      .journey-viewer__toolbar { justify-content: center; }
+      .journey-viewer__viewport { max-height: 68dvh; border-radius: calc(var(--radius-md) - 6px); }
+      #gallery > div:nth-of-type(2) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; }
+      #gallery figure figcaption { display: grid; }
+      #gallery figure figcaption strong { text-align: left; }
+      #design-system > div:first-of-type { grid-template-columns: repeat(2, 1fr); }
+      #design-system > div:first-of-type figure > span { height: 110px; }
+      #design-system > div:last-of-type { grid-template-columns: 1fr; }
+      #design-system > div:last-of-type article { min-height: 190px; }
+      #design-system > div:last-of-type p { margin-top: 34px; }
+      #status > div { grid-template-columns: 1fr; }
+      #status article,
+      #status article:nth-child(even) { min-height: auto; padding: 28px 0; border-left: 0; }
+      #status article h3 { margin-top: 36px; }
+      main > section:last-of-type nav { grid-template-columns: 1fr; }
+      main > section:last-of-type nav a,
+      main > section:last-of-type nav a:nth-child(even) { min-height: auto; padding: 20px 0; border-left: 0; }
+      .lightbox { padding: 0; }
+      .lightbox__panel { width: 100%; max-height: 100dvh; min-height: 100dvh; border: 0; border-radius: 0; }
+      .lightbox__panel > header { padding: 14px 16px; }
+      .lightbox__stage { grid-template-columns: 1fr 1fr; grid-template-areas: "image image" "prev next"; gap: 10px; padding: 12px; overflow-y: auto; }
+      .lightbox__stage figure { grid-area: image; }
+      .lightbox__stage img { height: auto; max-height: calc(100dvh - 180px); }
+      .lightbox__move { width: 100%; height: 46px; }
+      .lightbox__move--prev { grid-area: prev; }
+      .lightbox__move--next { grid-area: next; }
+    }
+
+    @media (max-width: 460px) {
+      #gallery > div:nth-of-type(2) { grid-template-columns: 1fr; }
+      #gallery figure img { aspect-ratio: 4 / 5; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content">跳到主要内容</a>
+
+  <nav aria-label="项目展示章节导航">
+    <a href="#project">项目</a>
+    <a href="#product">产品</a>
+    <a href="#modules">模块</a>
+    <a href="#journey">流程</a>
+    <a href="#gallery">设计稿</a>
+    <a href="#design-system">设计体系</a>
+    <a href="#status">当前状态</a>
+  </nav>
+
+  <main id="main-content">
+    <section id="project" aria-labelledby="project-title">
+      <div>
+        <p>只属于两个人的故事档案</p>
+        <h1 id="project-title">独家童话</h1>
+        <p>把恋爱过程，慢慢写成一本只属于两个人的童话绘本。</p>
+        <p>一款面向情侣的私密记录与回忆创作应用，让两个人共同保存日常、纪念重要时刻，并将文字与照片变成可以收藏的故事。</p>
+        <div aria-label="项目关键数据">
+          <article><strong>4</strong><span>核心 Tab</span></article>
+          <article><strong>8</strong><span>当前设计模块</span></article>
+          <article><strong>114</strong><span>正式页面与状态稿</span></article>
+          <article><strong>约 89</strong><span>逻辑页面</span></article>
+        </div>
+      </div>
+      <figure>
+        <img src="05-图片资产与生成/独家童话-App图标-当前选定版.png" alt="独家童话 App 图标，两个人并肩坐在爱心形绘本中的晚霞前" width="1254" height="1254">
+        <figcaption>当前选定 App 图标</figcaption>
+      </figure>
+    </section>
+
+    <section id="product" aria-labelledby="product-title">
+      <header>
+        <p>产品核心</p>
+        <h2 id="product-title">一段关系，持续长成一本故事书</h2>
+        <p>它不是公开社交动态，也不只是记录工具。独家童话把两个人的日常、共同创作和时间沉淀组织成一份持续成长的私人记忆。</p>
+      </header>
+      <ol>
+        <li>
+          <span>01</span>
+          <h3>记录日常</h3>
+          <p>写下日记、保存照片、记录心情，让普通生活成为可以回看的故事。</p>
+        </li>
+        <li>
+          <span>02</span>
+          <h3>共同创造</h3>
+          <p>情侣双方共同编辑、补充和完成内容，而不只是查看对方发布的记录。</p>
+        </li>
+        <li>
+          <span>03</span>
+          <h3>重新发现</h3>
+          <p>系统在合适的时机带回过去的片段，让旧回忆能够继续被补充和创作。</p>
+        </li>
+        <li>
+          <span>04</span>
+          <h3>长久收藏</h3>
+          <p>把日记、照片、纪念日、AI 作品和宠物成长整理成属于两个人的回忆册。</p>
+        </li>
+      </ol>
+
+      <div aria-labelledby="tabs-title">
+        <header>
+          <p>产品入口</p>
+          <h3 id="tabs-title">四个主 Tab 承载八个业务模块</h3>
+          <p>四个 Tab 是用户每天使用的主要入口，八个模块是当前设计稿与功能范围的组织方式。</p>
+        </header>
+        <div>
+          <article>
+            <span>首页</span>
+            <h4>今天的恋爱绘本</h4>
+            <p>共同记录、回忆再发现、日记照片与日常任务。</p>
+          </article>
+          <article>
+            <span>情侣空间</span>
+            <h4>两个人的共同宇宙</h4>
+            <p>重要时刻、共同时间线、互动、宠物与回忆章节。</p>
+          </article>
+          <article>
+            <span>童话工坊</span>
+            <h4>把回忆变成童话</h4>
+            <p>漫画、影片、角色设定、生成过程与作品收藏。</p>
+          </article>
+          <article>
+            <span>我的</span>
+            <h4>私人收藏与管理</h4>
+            <p>个人资料、草稿、会员、设置、数据与回忆册管理。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="modules" aria-labelledby="modules-title">
+      <header>
+        <p>当前设计基准</p>
+        <h2 id="modules-title">八个模块，组成完整的双人故事旅程</h2>
+        <p>以下数据来自“新模块分布”目录根层的当前正式设计稿。历史未通过稿和探索提案不参与展示。</p>
+      </header>
+
+      <div>
+        <article data-module="01">
+          <div><span>01</span><span>8 张正式稿 · 8 个逻辑页面</span></div>
+          <h3>账号登录</h3>
+          <p>帮助用户安全进入应用，覆盖引导、登录、注册、找回密码、验证码和结果状态。</p>
+          <ul><li>应用引导</li><li>登录与注册</li><li>账号验证</li><li>密码重置</li></ul>
+          <figure><img src="新模块分布/01-账号登录模块/01-引导页.png" alt="账号登录模块的引导页设计稿" loading="lazy"><figcaption>引导页</figcaption></figure>
+          <a href="#gallery" data-gallery-jump="01">查看模块设计稿</a>
+        </article>
+
+        <article data-module="02">
+          <div><span>02</span><span>9 张正式稿 · 9 个逻辑页面</span></div>
+          <h3>账号关联</h3>
+          <p>让两个人从个人账号进入共同空间，完成邀请、确认、等待和关系建立。</p>
+          <ul><li>建立情侣关系</li><li>分享邀请</li><li>关系确认</li><li>情侣资料设置</li></ul>
+          <figure><img src="新模块分布/02-账号关联模块/05-情侣绑定成功页.png" alt="账号关联模块的情侣绑定成功页设计稿" loading="lazy"><figcaption>情侣绑定成功</figcaption></figure>
+          <a href="#gallery" data-gallery-jump="02">查看模块设计稿</a>
+        </article>
+
+        <article data-module="03">
+          <div><span>03</span><span>12 张正式稿 · 8 个逻辑页面</span></div>
+          <h3>童话首页</h3>
+          <p>承载每天最重要的共同记录入口，让日记、照片与被重新带回的回忆自然汇合。</p>
+          <ul><li>共同记录</li><li>日记编辑</li><li>照片相册</li><li>回忆搜索</li></ul>
+          <figure><img src="新模块分布/03-童话首页模块/01-首页与共同记录-正常态.png" alt="童话首页正常状态设计稿" loading="lazy"><figcaption>首页与共同记录</figcaption></figure>
+          <a href="#gallery" data-gallery-jump="03">查看模块设计稿</a>
+        </article>
+
+        <article data-module="04">
+          <div><span>04</span><span>17 张正式稿 · 11 个逻辑页面</span></div>
+          <h3>重要时刻</h3>
+          <p>把纪念日、共同提醒、时光胶囊和悄悄留言组织成恋爱故事中的重要章节。</p>
+          <ul><li>重要时刻</li><li>纪念日</li><li>时光胶囊</li><li>悄悄留言</li></ul>
+          <figure><img src="新模块分布/04-重要时刻模块/07-纪念日倒计时页-纪念日当天.png" alt="纪念日当天倒计时页面设计稿" loading="lazy"><figcaption>纪念日当天</figcaption></figure>
+          <a href="#gallery" data-gallery-jump="04">查看模块设计稿</a>
+        </article>
+
+        <article data-module="05">
+          <div><span>05</span><span>10 张正式稿 · 10 个逻辑页面</span></div>
+          <h3>童话工坊</h3>
+          <p>从日记、照片和文字出发，把一段回忆变成漫画、影片或可以收藏的作品。</p>
+          <ul><li>素材选择</li><li>漫画创作</li><li>回忆影片</li><li>主角设定</li></ul>
+          <figure><img src="新模块分布/05 童话工坊模块/01-童话工坊首页.png" alt="童话工坊首页设计稿" loading="lazy"><figcaption>童话工坊首页</figcaption></figure>
+          <a href="#gallery" data-gallery-jump="05">查看模块设计稿</a>
+        </article>
+
+        <article data-module="06">
+          <div><span>06</span><span>12 张正式稿 · 12 个逻辑页面</span></div>
+          <h3>我的与设置</h3>
+          <p>集中管理个人信息、两个人的小世界、草稿、标签、会员和隐私数据。</p>
+          <ul><li>个人资料</li><li>情侣资料</li><li>草稿与标签</li><li>设置与数据</li></ul>
+          <figure><img src="新模块分布/06-我的与设置模块/03-我们的小世界页.png" alt="我们的小世界页面设计稿" loading="lazy"><figcaption>我们的小世界</figcaption></figure>
+          <a href="#gallery" data-gallery-jump="06">查看模块设计稿</a>
+        </article>
+
+        <article data-module="07">
+          <div><span>07</span><span>25 张正式稿 · 10 个逻辑页面</span></div>
+          <h3>情侣宠物</h3>
+          <p>两个人共同照顾的陪伴角色，把互动、任务、装扮和成长故事连接到共同回忆。</p>
+          <ul><li>共同领养</li><li>互动与喂食</li><li>装扮与房间</li><li>成长与成就</li></ul>
+          <figure><img src="新模块分布/07 情侣宠物模块/60-宠物空间首页-正常态.png" alt="情侣宠物空间首页设计稿" loading="lazy"><figcaption>宠物空间首页</figcaption></figure>
+          <a href="#gallery" data-gallery-jump="07">查看模块设计稿</a>
+        </article>
+
+        <article data-module="08">
+          <div><span>08</span><span>21 张正式稿 · 21 个逻辑页面</span></div>
+          <h3>共同回忆册</h3>
+          <p>将日记、照片、重要时刻、作品和宠物成长编排成可以共同补页与沉浸翻阅的故事书。</p>
+          <ul><li>新建回忆册</li><li>共同素材编排</li><li>沉浸翻阅</li><li>双人补页</li></ul>
+          <figure><img src="新模块分布/08-共同回忆册模块/16-沉浸翻阅页.png" alt="共同回忆册沉浸翻阅页面设计稿" loading="lazy"><figcaption>沉浸翻阅</figcaption></figure>
+          <a href="#gallery" data-gallery-jump="08">查看模块设计稿</a>
+        </article>
+      </div>
+    </section>
+
+    <section id="journey" aria-labelledby="journey-title">
+      <header>
+        <p>用户旅程</p>
+        <h2 id="journey-title">从相遇，到共同写满一本故事</h2>
+        <p>完成身份与情侣关系建立后，从四个主 Tab 进入日常记录、重要时刻、工坊创作、设置、情侣宠物与共同回忆册。</p>
+      </header>
+      <ol>
+        <li><span>1</span><strong>进入应用</strong><p>引导、注册或登录。</p></li>
+        <li><span>2</span><strong>建立关系</strong><p>邀请、确认并完成情侣资料。</p></li>
+        <li><span>3</span><strong>进入主界面</strong><p>从首页、情侣空间、童话工坊和我的开始。</p></li>
+        <li><span>4</span><strong>积累共同内容</strong><p>记录日常、沉淀重要时刻、创作作品并照顾宠物。</p></li>
+        <li><span>5</span><strong>编排与长期收藏</strong><p>把共同素材整理成可以阅读和双人补页的回忆册。</p></li>
+      </ol>
+      <figure class="journey-viewer">
+        <div class="journey-viewer__toolbar" aria-label="流程图缩放工具">
+          <button type="button" data-journey-zoom-out aria-label="缩小流程图">缩小</button>
+          <output data-journey-zoom-value aria-live="polite">100%</output>
+          <button type="button" data-journey-zoom-in aria-label="放大流程图">放大</button>
+          <button type="button" data-journey-zoom-reset>复位</button>
+        </div>
+        <div class="journey-viewer__viewport" data-journey-viewport tabindex="0" aria-label="可缩放和拖动查看的用户流程图">
+          <img src="09-流程图/用户使用流程.png" alt="独家童话用户使用流程图" loading="lazy" draggable="false" data-journey-image>
+        </div>
+        <figcaption>八模块 89 个逻辑页面的完整功能流程，从左向右阅读；支持滚轮缩放，可放大至 500%，放大后拖动或触摸平移查看。</figcaption>
+      </figure>
+    </section>
+
+    <section id="gallery" aria-labelledby="gallery-title">
+      <header>
+        <p>完整设计稿</p>
+        <h2 id="gallery-title">89 个逻辑页面，组成当前产品世界</h2>
+        <p>按页面编号合并同一页面的不同状态后，共展示 89 张当前正式设计稿。设计稿存在不代表代码已经实现。</p>
+      </header>
+      <div aria-label="按模块筛选设计稿">
+        <button type="button" data-filter="all" aria-pressed="true">全部</button>
+        <button type="button" data-filter="01" aria-pressed="false">账号登录</button>
+        <button type="button" data-filter="02" aria-pressed="false">账号关联</button>
+        <button type="button" data-filter="03" aria-pressed="false">童话首页</button>
+        <button type="button" data-filter="04" aria-pressed="false">重要时刻</button>
+        <button type="button" data-filter="05" aria-pressed="false">童话工坊</button>
+        <button type="button" data-filter="06" aria-pressed="false">我的与设置</button>
+        <button type="button" data-filter="07" aria-pressed="false">情侣宠物</button>
+        <button type="button" data-filter="08" aria-pressed="false">共同回忆册</button>
+        <output data-gallery-count aria-live="polite">89 张</output>
+      </div>
+      <div>
+        <figure data-gallery-module="01"><button type="button"><img src="新模块分布/01-账号登录模块/01-引导页.png" alt="账号登录，引导页" loading="lazy"></button><figcaption><span>账号登录</span><strong>引导页</strong></figcaption></figure>
+        <figure data-gallery-module="01"><button type="button"><img src="新模块分布/01-账号登录模块/02-登录页.png" alt="账号登录，登录页" loading="lazy"></button><figcaption><span>账号登录</span><strong>登录页</strong></figcaption></figure>
+        <figure data-gallery-module="01"><button type="button"><img src="新模块分布/01-账号登录模块/03-创建账号页.png" alt="账号登录，创建账号页" loading="lazy"></button><figcaption><span>账号登录</span><strong>创建账号页</strong></figcaption></figure>
+        <figure data-gallery-module="01"><button type="button"><img src="新模块分布/01-账号登录模块/04-找回密码账号验证页.png" alt="账号登录，找回密码账号验证页" loading="lazy"></button><figcaption><span>账号登录</span><strong>找回密码账号验证页</strong></figcaption></figure>
+        <figure data-gallery-module="01"><button type="button"><img src="新模块分布/01-账号登录模块/05-找回密码设置新密码页.png" alt="账号登录，找回密码设置新密码页" loading="lazy"></button><figcaption><span>账号登录</span><strong>找回密码设置新密码页</strong></figcaption></figure>
+        <figure data-gallery-module="01"><button type="button"><img src="新模块分布/01-账号登录模块/06-登录页-校验失败.png" alt="账号登录，登录页-校验失败" loading="lazy"></button><figcaption><span>账号登录</span><strong>登录页-校验失败</strong></figcaption></figure>
+        <figure data-gallery-module="01"><button type="button"><img src="新模块分布/01-账号登录模块/07-验证码已发送-等待验证.png" alt="账号登录，验证码已发送-等待验证" loading="lazy"></button><figcaption><span>账号登录</span><strong>验证码已发送-等待验证</strong></figcaption></figure>
+        <figure data-gallery-module="01"><button type="button"><img src="新模块分布/01-账号登录模块/08-密码重置成功.png" alt="账号登录，密码重置成功" loading="lazy"></button><figcaption><span>账号登录</span><strong>密码重置成功</strong></figcaption></figure>
+        <figure data-gallery-module="02"><button type="button"><img src="新模块分布/02-账号关联模块/01-建立情侣关系页.png" alt="账号关联，建立情侣关系页" loading="lazy"></button><figcaption><span>账号关联</span><strong>建立情侣关系页</strong></figcaption></figure>
+        <figure data-gallery-module="02"><button type="button"><img src="新模块分布/02-账号关联模块/02-分享邀请页.png" alt="账号关联，分享邀请页" loading="lazy"></button><figcaption><span>账号关联</span><strong>分享邀请页</strong></figcaption></figure>
+        <figure data-gallery-module="02"><button type="button"><img src="新模块分布/02-账号关联模块/03-填写邀请码页.png" alt="账号关联，填写邀请码页" loading="lazy"></button><figcaption><span>账号关联</span><strong>填写邀请码页</strong></figcaption></figure>
+        <figure data-gallery-module="02"><button type="button"><img src="新模块分布/02-账号关联模块/04-情侣关系确认页.png" alt="账号关联，情侣关系确认页" loading="lazy"></button><figcaption><span>账号关联</span><strong>情侣关系确认页</strong></figcaption></figure>
+        <figure data-gallery-module="02"><button type="button"><img src="新模块分布/02-账号关联模块/05-情侣绑定成功页.png" alt="账号关联，情侣绑定成功页" loading="lazy"></button><figcaption><span>账号关联</span><strong>情侣绑定成功页</strong></figcaption></figure>
+        <figure data-gallery-module="02"><button type="button"><img src="新模块分布/02-账号关联模块/06-情侣信息设置页.png" alt="账号关联，情侣信息设置页" loading="lazy"></button><figcaption><span>账号关联</span><strong>情侣信息设置页</strong></figcaption></figure>
+        <figure data-gallery-module="02"><button type="button"><img src="新模块分布/02-账号关联模块/07-等待TA确认.png" alt="账号关联，等待TA确认" loading="lazy"></button><figcaption><span>账号关联</span><strong>等待TA确认</strong></figcaption></figure>
+        <figure data-gallery-module="02"><button type="button"><img src="新模块分布/02-账号关联模块/08-邀请码失效或不可用.png" alt="账号关联，邀请码失效或不可用" loading="lazy"></button><figcaption><span>账号关联</span><strong>邀请码失效或不可用</strong></figcaption></figure>
+        <figure data-gallery-module="02"><button type="button"><img src="新模块分布/02-账号关联模块/09-当前账号已有情侣关系.png" alt="账号关联，当前账号已有情侣关系" loading="lazy"></button><figcaption><span>账号关联</span><strong>当前账号已有情侣关系</strong></figcaption></figure>
+        <figure data-gallery-module="03"><button type="button"><img src="新模块分布/03-童话首页模块/01-首页与共同记录-正常态.png" alt="童话首页，首页与共同记录-正常态" loading="lazy"></button><figcaption><span>童话首页</span><strong>首页与共同记录-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="03"><button type="button"><img src="新模块分布/03-童话首页模块/02-共同记录搜索页-结果状态.png" alt="童话首页，共同记录搜索页-结果状态" loading="lazy"></button><figcaption><span>童话首页</span><strong>共同记录搜索页-结果状态</strong></figcaption></figure>
+        <figure data-gallery-module="03"><button type="button"><img src="新模块分布/03-童话首页模块/03-日记编辑页.png" alt="童话首页，日记编辑页" loading="lazy"></button><figcaption><span>童话首页</span><strong>日记编辑页</strong></figcaption></figure>
+        <figure data-gallery-module="03"><button type="button"><img src="新模块分布/03-童话首页模块/04-日记列表页.png" alt="童话首页，日记列表页" loading="lazy"></button><figcaption><span>童话首页</span><strong>日记列表页</strong></figcaption></figure>
+        <figure data-gallery-module="03"><button type="button"><img src="新模块分布/03-童话首页模块/05-日记详情页-共同可见.png" alt="童话首页，日记详情页-共同可见" loading="lazy"></button><figcaption><span>童话首页</span><strong>日记详情页-共同可见</strong></figcaption></figure>
+        <figure data-gallery-module="03"><button type="button"><img src="新模块分布/03-童话首页模块/06-照片相册页-网格状态.png" alt="童话首页，照片相册页-网格状态" loading="lazy"></button><figcaption><span>童话首页</span><strong>照片相册页-网格状态</strong></figcaption></figure>
+        <figure data-gallery-module="03"><button type="button"><img src="新模块分布/03-童话首页模块/07-照片上传页.png" alt="童话首页，照片上传页" loading="lazy"></button><figcaption><span>童话首页</span><strong>照片上传页</strong></figcaption></figure>
+        <figure data-gallery-module="03"><button type="button"><img src="新模块分布/03-童话首页模块/08-照片详情页.png" alt="童话首页，照片详情页" loading="lazy"></button><figcaption><span>童话首页</span><strong>照片详情页</strong></figcaption></figure>
+        <figure data-gallery-module="04"><button type="button"><img src="新模块分布/04-重要时刻模块/01-重要时刻首页-正常态.png" alt="重要时刻，重要时刻首页-正常态" loading="lazy"></button><figcaption><span>重要时刻</span><strong>重要时刻首页-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="04"><button type="button"><img src="新模块分布/04-重要时刻模块/02-重要时刻详情页.png" alt="重要时刻，重要时刻详情页" loading="lazy"></button><figcaption><span>重要时刻</span><strong>重要时刻详情页</strong></figcaption></figure>
+        <figure data-gallery-module="04"><button type="button"><img src="新模块分布/04-重要时刻模块/03-重要时刻新建编辑页.png" alt="重要时刻，重要时刻新建编辑页" loading="lazy"></button><figcaption><span>重要时刻</span><strong>重要时刻新建编辑页</strong></figcaption></figure>
+        <figure data-gallery-module="04"><button type="button"><img src="新模块分布/04-重要时刻模块/04-共同提醒页-未读状态.png" alt="重要时刻，共同提醒页-未读状态" loading="lazy"></button><figcaption><span>重要时刻</span><strong>共同提醒页-未读状态</strong></figcaption></figure>
+        <figure data-gallery-module="04"><button type="button"><img src="新模块分布/04-重要时刻模块/05-纪念日管理页-正常态.png" alt="重要时刻，纪念日管理页-正常态" loading="lazy"></button><figcaption><span>重要时刻</span><strong>纪念日管理页-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="04"><button type="button"><img src="新模块分布/04-重要时刻模块/06-纪念日添加编辑页.png" alt="重要时刻，纪念日添加编辑页" loading="lazy"></button><figcaption><span>重要时刻</span><strong>纪念日添加编辑页</strong></figcaption></figure>
+        <figure data-gallery-module="04"><button type="button"><img src="新模块分布/04-重要时刻模块/07-纪念日倒计时页-正常态.png" alt="重要时刻，纪念日倒计时页-正常态" loading="lazy"></button><figcaption><span>重要时刻</span><strong>纪念日倒计时页-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="04"><button type="button"><img src="新模块分布/04-重要时刻模块/08-时光胶囊列表页.png" alt="重要时刻，时光胶囊列表页" loading="lazy"></button><figcaption><span>重要时刻</span><strong>时光胶囊列表页</strong></figcaption></figure>
+        <figure data-gallery-module="04"><button type="button"><img src="新模块分布/04-重要时刻模块/09-时光胶囊编辑新建页.png" alt="重要时刻，时光胶囊编辑新建页" loading="lazy"></button><figcaption><span>重要时刻</span><strong>时光胶囊编辑新建页</strong></figcaption></figure>
+        <figure data-gallery-module="04"><button type="button"><img src="新模块分布/04-重要时刻模块/10-时光胶囊详情页-已开启.png" alt="重要时刻，时光胶囊详情页-已开启" loading="lazy"></button><figcaption><span>重要时刻</span><strong>时光胶囊详情页-已开启</strong></figcaption></figure>
+        <figure data-gallery-module="04"><button type="button"><img src="新模块分布/04-重要时刻模块/11-悄悄留言列表页-正常态.png" alt="重要时刻，悄悄留言列表页-正常态" loading="lazy"></button><figcaption><span>重要时刻</span><strong>悄悄留言列表页-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="05"><button type="button"><img src="新模块分布/05 童话工坊模块/01-童话工坊首页.png" alt="童话工坊，童话工坊首页" loading="lazy"></button><figcaption><span>童话工坊</span><strong>童话工坊首页</strong></figcaption></figure>
+        <figure data-gallery-module="05"><button type="button"><img src="新模块分布/05 童话工坊模块/02-创作素材选择页.png" alt="童话工坊，创作素材选择页" loading="lazy"></button><figcaption><span>童话工坊</span><strong>创作素材选择页</strong></figcaption></figure>
+        <figure data-gallery-module="05"><button type="button"><img src="新模块分布/05 童话工坊模块/03-回忆转漫画编辑页.png" alt="童话工坊，回忆转漫画编辑页" loading="lazy"></button><figcaption><span>童话工坊</span><strong>回忆转漫画编辑页</strong></figcaption></figure>
+        <figure data-gallery-module="05"><button type="button"><img src="新模块分布/05 童话工坊模块/04-照片转漫画编辑页.png" alt="童话工坊，照片转漫画编辑页" loading="lazy"></button><figcaption><span>童话工坊</span><strong>照片转漫画编辑页</strong></figcaption></figure>
+        <figure data-gallery-module="05"><button type="button"><img src="新模块分布/05 童话工坊模块/05-回忆影片编辑页.png" alt="童话工坊，回忆影片编辑页" loading="lazy"></button><figcaption><span>童话工坊</span><strong>回忆影片编辑页</strong></figcaption></figure>
+        <figure data-gallery-module="05"><button type="button"><img src="新模块分布/05 童话工坊模块/06-魔法生成中页.png" alt="童话工坊，魔法生成中页" loading="lazy"></button><figcaption><span>童话工坊</span><strong>魔法生成中页</strong></figcaption></figure>
+        <figure data-gallery-module="05"><button type="button"><img src="新模块分布/05 童话工坊模块/07-生成失败页.png" alt="童话工坊，生成失败页" loading="lazy"></button><figcaption><span>童话工坊</span><strong>生成失败页</strong></figcaption></figure>
+        <figure data-gallery-module="05"><button type="button"><img src="新模块分布/05 童话工坊模块/08-作品详情页.png" alt="童话工坊，作品详情页" loading="lazy"></button><figcaption><span>童话工坊</span><strong>作品详情页</strong></figcaption></figure>
+        <figure data-gallery-module="05"><button type="button"><img src="新模块分布/05 童话工坊模块/09-我的创作页.png" alt="童话工坊，我的创作页" loading="lazy"></button><figcaption><span>童话工坊</span><strong>我的创作页</strong></figcaption></figure>
+        <figure data-gallery-module="05"><button type="button"><img src="新模块分布/05 童话工坊模块/10-我们的主角设定页.png" alt="童话工坊，我们的主角设定页" loading="lazy"></button><figcaption><span>童话工坊</span><strong>我们的主角设定页</strong></figcaption></figure>
+        <figure data-gallery-module="06"><button type="button"><img src="新模块分布/06-我的与设置模块/01-我的与设置首页.png" alt="我的与设置，我的与设置首页" loading="lazy"></button><figcaption><span>我的与设置</span><strong>我的与设置首页</strong></figcaption></figure>
+        <figure data-gallery-module="06"><button type="button"><img src="新模块分布/06-我的与设置模块/02-编辑个人资料页.png" alt="我的与设置，编辑个人资料页" loading="lazy"></button><figcaption><span>我的与设置</span><strong>编辑个人资料页</strong></figcaption></figure>
+        <figure data-gallery-module="06"><button type="button"><img src="新模块分布/06-我的与设置模块/03-我们的小世界页.png" alt="我的与设置，我们的小世界页" loading="lazy"></button><figcaption><span>我的与设置</span><strong>我们的小世界页</strong></figcaption></figure>
+        <figure data-gallery-module="06"><button type="button"><img src="新模块分布/06-我的与设置模块/04-草稿箱页.png" alt="我的与设置，草稿箱页" loading="lazy"></button><figcaption><span>我的与设置</span><strong>草稿箱页</strong></figcaption></figure>
+        <figure data-gallery-module="06"><button type="button"><img src="新模块分布/06-我的与设置模块/05-标签管理页.png" alt="我的与设置，标签管理页" loading="lazy"></button><figcaption><span>我的与设置</span><strong>标签管理页</strong></figcaption></figure>
+        <figure data-gallery-module="06"><button type="button"><img src="新模块分布/06-我的与设置模块/06-童话会员页.png" alt="我的与设置，童话会员页" loading="lazy"></button><figcaption><span>我的与设置</span><strong>童话会员页</strong></figcaption></figure>
+        <figure data-gallery-module="06"><button type="button"><img src="新模块分布/06-我的与设置模块/07-设置首页.png" alt="我的与设置，设置首页" loading="lazy"></button><figcaption><span>我的与设置</span><strong>设置首页</strong></figcaption></figure>
+        <figure data-gallery-module="06"><button type="button"><img src="新模块分布/06-我的与设置模块/08-账号与安全页.png" alt="我的与设置，账号与安全页" loading="lazy"></button><figcaption><span>我的与设置</span><strong>账号与安全页</strong></figcaption></figure>
+        <figure data-gallery-module="06"><button type="button"><img src="新模块分布/06-我的与设置模块/09-隐私与共同可见页.png" alt="我的与设置，隐私与共同可见页" loading="lazy"></button><figcaption><span>我的与设置</span><strong>隐私与共同可见页</strong></figcaption></figure>
+        <figure data-gallery-module="06"><button type="button"><img src="新模块分布/06-我的与设置模块/10-通知设置页.png" alt="我的与设置，通知设置页" loading="lazy"></button><figcaption><span>我的与设置</span><strong>通知设置页</strong></figcaption></figure>
+        <figure data-gallery-module="06"><button type="button"><img src="新模块分布/06-我的与设置模块/11-数据与存储页.png" alt="我的与设置，数据与存储页" loading="lazy"></button><figcaption><span>我的与设置</span><strong>数据与存储页</strong></figcaption></figure>
+        <figure data-gallery-module="06"><button type="button"><img src="新模块分布/06-我的与设置模块/12-帮助与关于页.png" alt="我的与设置，帮助与关于页" loading="lazy"></button><figcaption><span>我的与设置</span><strong>帮助与关于页</strong></figcaption></figure>
+        <figure data-gallery-module="07"><button type="button"><img src="新模块分布/07 情侣宠物模块/60-宠物空间首页-正常态.png" alt="情侣宠物，宠物空间首页-正常态" loading="lazy"></button><figcaption><span>情侣宠物</span><strong>宠物空间首页-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="07"><button type="button"><img src="新模块分布/07 情侣宠物模块/61-宠物互动页-正常态.png" alt="情侣宠物，宠物互动页-正常态" loading="lazy"></button><figcaption><span>情侣宠物</span><strong>宠物互动页-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="07"><button type="button"><img src="新模块分布/07 情侣宠物模块/62-喂食页-正常态.png" alt="情侣宠物，喂食页-正常态" loading="lazy"></button><figcaption><span>情侣宠物</span><strong>喂食页-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="07"><button type="button"><img src="新模块分布/07 情侣宠物模块/63-任务页-正常态.png" alt="情侣宠物，任务页-正常态" loading="lazy"></button><figcaption><span>情侣宠物</span><strong>任务页-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="07"><button type="button"><img src="新模块分布/07 情侣宠物模块/64-宠物装扮页-正常态.png" alt="情侣宠物，宠物装扮页-正常态" loading="lazy"></button><figcaption><span>情侣宠物</span><strong>宠物装扮页-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="07"><button type="button"><img src="新模块分布/07 情侣宠物模块/65-房间布置页-正常态.png" alt="情侣宠物，房间布置页-正常态" loading="lazy"></button><figcaption><span>情侣宠物</span><strong>房间布置页-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="07"><button type="button"><img src="新模块分布/07 情侣宠物模块/66-成长故事页-正常态.png" alt="情侣宠物，成长故事页-正常态" loading="lazy"></button><figcaption><span>情侣宠物</span><strong>成长故事页-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="07"><button type="button"><img src="新模块分布/07 情侣宠物模块/67-成就页-正常态.png" alt="情侣宠物，成就页-正常态" loading="lazy"></button><figcaption><span>情侣宠物</span><strong>成就页-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="07"><button type="button"><img src="新模块分布/07 情侣宠物模块/68-宠物图鉴页-正常态.png" alt="情侣宠物，宠物图鉴页-正常态" loading="lazy"></button><figcaption><span>情侣宠物</span><strong>宠物图鉴页-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="07"><button type="button"><img src="新模块分布/07 情侣宠物模块/69-宠物设置页-正常态.png" alt="情侣宠物，宠物设置页-正常态" loading="lazy"></button><figcaption><span>情侣宠物</span><strong>宠物设置页-正常态</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/01-书架.png" alt="共同回忆册，书架" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>书架</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/02-空书架.png" alt="共同回忆册，空书架" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>空书架</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/03-本月回忆推荐.png" alt="共同回忆册，本月回忆推荐" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>本月回忆推荐</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/04-新建回忆册-基础信息.png" alt="共同回忆册，新建回忆册-基础信息" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>新建回忆册-基础信息</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/05-主题与封面选择.png" alt="共同回忆册，主题与封面选择" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>主题与封面选择</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/06-选择共同素材.png" alt="共同回忆册，选择共同素材" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>选择共同素材</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/07-素材预览与确认.png" alt="共同回忆册，素材预览与确认" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>素材预览与确认</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/08-选择回忆页模板.png" alt="共同回忆册，选择回忆页模板" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>选择回忆页模板</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/09-日记摘录页编排.png" alt="共同回忆册，日记摘录页编排" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>日记摘录页编排</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/10-照片故事页编排.png" alt="共同回忆册，照片故事页编排" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>照片故事页编排</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/11-重要时刻页编排.png" alt="共同回忆册，重要时刻页编排" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>重要时刻页编排</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/12-作品与宠物成长页编排.png" alt="共同回忆册，作品与宠物成长页编排" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>作品与宠物成长页编排</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/13-章节与页序整理.png" alt="共同回忆册，章节与页序整理" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>章节与页序整理</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/14-建册完成.png" alt="共同回忆册，建册完成" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>建册完成</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/15-回忆册目录.png" alt="共同回忆册，回忆册目录" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>回忆册目录</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/16-沉浸翻阅页.png" alt="共同回忆册，沉浸翻阅页" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>沉浸翻阅页</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/17-阅读工具菜单.png" alt="共同回忆册，阅读工具菜单" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>阅读工具菜单</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/18-添加双人补页.png" alt="共同回忆册，添加双人补页" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>添加双人补页</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/19-双人补页编辑.png" alt="共同回忆册，双人补页编辑" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>双人补页编辑</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/20-含补页的阅读状态.png" alt="共同回忆册，含补页的阅读状态" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>含补页的阅读状态</strong></figcaption></figure>
+        <figure data-gallery-module="08"><button type="button"><img src="新模块分布/08-共同回忆册模块/21-回忆册管理与删除确认.png" alt="共同回忆册，回忆册管理与删除确认" loading="lazy"></button><figcaption><span>共同回忆册</span><strong>回忆册管理与删除确认</strong></figcaption></figure>
+      </div>
+    </section>
+
+    <section aria-labelledby="functions-title">
+      <header>
+        <p>页面功能</p>
+        <h2 id="functions-title">先看用户任务，再查看页面明细</h2>
+        <p>页面设计、视觉审批、代码实现和真实设备验证是四个不同状态。</p>
+      </header>
+      <div>
+        <article>
+          <button type="button" aria-expanded="false" aria-controls="function-records">记录与共同创作</button>
+          <div id="function-records" hidden>
+            <p>覆盖童话首页、日记、照片、搜索、回忆再发现和共同回忆册。</p>
+            <ul><li>共同记录与日记编辑</li><li>相册、照片上传与照片详情</li><li>回忆册建册、编排与双人补页</li></ul>
+          </div>
+        </article>
+        <article>
+          <button type="button" aria-expanded="false" aria-controls="function-couple">情侣关系与重要时刻</button>
+          <div id="function-couple" hidden>
+            <p>覆盖关系建立、情侣资料、纪念日、共同提醒、时光胶囊和悄悄留言。</p>
+            <ul><li>邀请、绑定与异常分流</li><li>纪念日与重要章节</li><li>两个人的共同可见范围</li></ul>
+          </div>
+        </article>
+        <article>
+          <button type="button" aria-expanded="false" aria-controls="function-ai">AI 童话创作</button>
+          <div id="function-ai" hidden>
+            <p>覆盖素材选择、漫画、影片、主角设定、生成状态和作品详情。</p>
+            <ul><li>从回忆或照片开始创作</li><li>查看生成过程与失败状态</li><li>保存、查看和继续整理作品</li></ul>
+          </div>
+        </article>
+        <article>
+          <button type="button" aria-expanded="false" aria-controls="function-care">陪伴、管理与长期保存</button>
+          <div id="function-care" hidden>
+            <p>覆盖情侣宠物、个人资料、草稿、会员、设置、隐私和数据。</p>
+            <ul><li>共同宠物互动与成长</li><li>个人与情侣资料管理</li><li>会员、通知、存储和帮助</li></ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="design-system" aria-labelledby="design-title">
+      <header>
+        <p>设计体系</p>
+        <h2 id="design-title">奶油纸感绘本，承载克制的私人浪漫</h2>
+        <p>视觉强调温柔、收藏感和时间沉淀。AI 功能被表达为魔法正在发生，而不是冷冰冰的工具操作。</p>
+      </header>
+      <div aria-label="品牌色板">
+        <figure><span style="background:#f8f6f2"></span><figcaption><strong>月白</strong><code>#F8F6F2</code></figcaption></figure>
+        <figure><span style="background:#f6bec8"></span><figcaption><strong>桃夭</strong><code>#F6BEC8</code></figcaption></figure>
+        <figure><span style="background:#e9d7d2"></span><figcaption><strong>藕丝秋半</strong><code>#E9D7D2</code></figcaption></figure>
+        <figure><span style="background:#b08a8f"></span><figcaption><strong>枯玫瑰</strong><code>#B08A8F</code></figcaption></figure>
+        <figure><span style="background:#6b4f4f"></span><figcaption><strong>可可棕</strong><code>#6B4F4F</code></figcaption></figure>
+        <figure><span style="background:#d8b384"></span><figcaption><strong>琥珀金</strong><code>#D8B384</code></figcaption></figure>
+      </div>
+      <div>
+        <article><h3>保留</h3><p>纸张肌理、手写故事、回忆收藏、双人宇宙、柔和留白与克制的绘本装饰。</p></article>
+        <article><h3>避免</h3><p>高饱和粉色、低幼卡通、复杂二次元、公开朋友圈信息流和强科技 AI 风。</p></article>
+      </div>
+    </section>
+
+    <section id="status" aria-labelledby="status-title">
+      <header>
+        <p>当前状态</p>
+        <h2 id="status-title">设计资料已经成形，审批与开发仍需分别推进</h2>
+      </header>
+      <div>
+        <article><span>已设计</span><h3>八模块最近一轮设计稿</h3><p>114 张正式页面与状态稿已经整理到当前模块目录。</p></article>
+        <article><span>待视觉审批</span><h3>页面密度与装饰复杂度</h3><p>当前设计稿尚未完成最终视觉审批，仍需专项评审。</p></article>
+        <article><span>开发状态独立</span><h3>设计稿不等于已实现</h3><p>当前设计模块与现有代码路由不是一一对应关系。</p></article>
+        <article><span>规划中</span><h3>共同宠物与回忆册等能力</h3><p>部分模块已有完整设计范围，但不能据此标记为已开发完成。</p></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="sources-title">
+      <header>
+        <p>继续阅读</p>
+        <h2 id="sources-title">从展示页回到可信资料源</h2>
+      </header>
+      <nav aria-label="项目资料入口">
+        <a href="01-项目总览/项目介绍.md">项目介绍</a>
+        <a href="02-产品与功能/产品结构.md">产品结构</a>
+        <a href="02-产品与功能/所有页面功能清单.md">页面功能清单</a>
+        <a href="03-UI与设计系统/《独家童话》Design System v1.0.md">Design System</a>
+        <a href="09-流程图/用户使用流程.md">用户使用流程</a>
+        <a href="05-图片资产与生成/图片资产与生成记录.md">图片资产记录</a>
+      </nav>
+    </section>
+  </main>
+
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-title" hidden>
+    <div class="lightbox__backdrop" data-lightbox-close></div>
+    <div class="lightbox__panel">
+      <header>
+        <div>
+          <p>设计稿预览</p>
+          <h2 id="lightbox-title">页面设计稿</h2>
+        </div>
+        <button type="button" class="lightbox__close" aria-label="关闭大图预览" data-lightbox-close>关闭</button>
+      </header>
+      <div class="lightbox__stage">
+        <button type="button" class="lightbox__move lightbox__move--prev" aria-label="查看上一张设计稿" data-lightbox-prev>上一张</button>
+        <figure>
+          <img id="lightbox-image" src="05-图片资产与生成/独家童话-App图标-当前选定版.png" alt="">
+          <figcaption><code id="lightbox-path"></code></figcaption>
+        </figure>
+        <button type="button" class="lightbox__move lightbox__move--next" aria-label="查看下一张设计稿" data-lightbox-next>下一张</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>独家童话项目资料 · 把两个人的日常，慢慢写成一本故事书。</p>
+  </footer>
+
+  <script>
+    const modules = [
+      { id: '01', name: '账号登录', screens: 8, logicalPages: 8 },
+      { id: '02', name: '账号关联', screens: 9, logicalPages: 9 },
+      { id: '03', name: '童话首页', screens: 12, logicalPages: 8 },
+      { id: '04', name: '重要时刻', screens: 17, logicalPages: 11 },
+      { id: '05', name: '童话工坊', screens: 10, logicalPages: 10 },
+      { id: '06', name: '我的与设置', screens: 12, logicalPages: 12 },
+      { id: '07', name: '情侣宠物', screens: 25, logicalPages: 10 },
+      { id: '08', name: '共同回忆册', screens: 21, logicalPages: 21 }
+    ];
+
+    const filterButtons = Array.from(document.querySelectorAll('[data-filter]'));
+    const galleryFigures = Array.from(document.querySelectorAll('[data-gallery-module]'));
+    const galleryButtons = galleryFigures.map((figure) => figure.querySelector('button'));
+    const galleryCount = document.querySelector('[data-gallery-count]');
+    const previewButtons = galleryButtons;
+    const journeyViewport = document.querySelector('[data-journey-viewport]');
+    const journeyImage = document.querySelector('[data-journey-image]');
+    const journeyZoomValue = document.querySelector('[data-journey-zoom-value]');
+    const journeyZoomOut = document.querySelector('[data-journey-zoom-out]');
+    const journeyZoomIn = document.querySelector('[data-journey-zoom-in]');
+    const journeyZoomReset = document.querySelector('[data-journey-zoom-reset]');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImage = document.getElementById('lightbox-image');
+    const lightboxTitle = document.getElementById('lightbox-title');
+    const lightboxPath = document.getElementById('lightbox-path');
+    const lightboxClose = lightbox.querySelector('.lightbox__close');
+    let currentPreviewIndex = 0;
+    let lastPreviewTrigger = null;
+    let journeyZoom = 1;
+    let journeyDrag = null;
+
+    function setGalleryFilter(moduleId) {
+      filterButtons.forEach((button) => {
+        button.setAttribute('aria-pressed', String(button.dataset.filter === moduleId));
+      });
+
+      galleryFigures.forEach((figure) => {
+        figure.hidden = moduleId !== 'all' && figure.dataset.galleryModule !== moduleId;
+      });
+
+      const visibleCount = galleryFigures.filter((figure) => !figure.hidden).length;
+      galleryCount.textContent = `${visibleCount} 张`;
+    }
+
+    function setJourneyZoom(nextZoom, anchor) {
+      const boundedZoom = Math.min(5, Math.max(.5, Math.round(nextZoom * 4) / 4));
+      const focusX = anchor ? anchor.x : journeyViewport.clientWidth / 2;
+      const focusY = anchor ? anchor.y : journeyViewport.clientHeight / 2;
+      const centerX = journeyViewport.scrollWidth
+        ? (journeyViewport.scrollLeft + focusX) / journeyViewport.scrollWidth
+        : .5;
+      const centerY = journeyViewport.scrollHeight
+        ? (journeyViewport.scrollTop + focusY) / journeyViewport.scrollHeight
+        : .5;
+
+      journeyZoom = boundedZoom;
+      journeyImage.style.width = `${journeyZoom * 100}%`;
+      journeyZoomValue.textContent = `${Math.round(journeyZoom * 100)}%`;
+      journeyZoomOut.disabled = journeyZoom <= .5;
+      journeyZoomIn.disabled = journeyZoom >= 5;
+
+      requestAnimationFrame(() => {
+        journeyViewport.scrollLeft = centerX * journeyViewport.scrollWidth - focusX;
+        journeyViewport.scrollTop = centerY * journeyViewport.scrollHeight - focusY;
+      });
+    }
+
+    function resetJourneyZoom() {
+      journeyZoom = 1;
+      journeyImage.style.width = '100%';
+      journeyZoomValue.textContent = '100%';
+      journeyZoomOut.disabled = false;
+      journeyZoomIn.disabled = false;
+      journeyViewport.scrollTo({ left: 0, top: 0, behavior: 'smooth' });
+    }
+
+    function getPreviewData(index) {
+      const normalizedIndex = (index + previewButtons.length) % previewButtons.length;
+      const button = previewButtons[normalizedIndex];
+      const image = button.querySelector('img');
+      const figure = button.closest('figure');
+      const caption = figure ? figure.querySelector('figcaption strong') : null;
+
+      return {
+        index: normalizedIndex,
+        button,
+        source: button.dataset.lightboxSrc || image.getAttribute('src'),
+        title: button.dataset.lightboxTitle || (caption ? caption.textContent.trim() : image.alt),
+        alt: image.alt
+      };
+    }
+
+    function openLightbox(index) {
+      const data = getPreviewData(index);
+      currentPreviewIndex = data.index;
+      lastPreviewTrigger = data.button;
+      lightboxImage.src = data.source;
+      lightboxImage.alt = data.alt;
+      lightboxTitle.textContent = data.title;
+      lightboxPath.textContent = data.source;
+      lightbox.hidden = false;
+      document.body.classList.add('modal-open');
+      lightboxClose.focus();
+    }
+
+    function closeLightbox() {
+      if (lightbox.hidden) return;
+      lightbox.hidden = true;
+      document.body.classList.remove('modal-open');
+      if (lastPreviewTrigger) lastPreviewTrigger.focus();
+    }
+
+    function moveLightbox(delta) {
+      openLightbox(currentPreviewIndex + delta);
+    }
+
+    filterButtons.forEach((button) => {
+      button.addEventListener('click', () => setGalleryFilter(button.dataset.filter));
+    });
+
+    document.querySelectorAll('[data-gallery-jump]').forEach((link) => {
+      link.addEventListener('click', () => setGalleryFilter(link.dataset.galleryJump));
+    });
+
+    journeyZoomOut.addEventListener('click', () => setJourneyZoom(journeyZoom - .25));
+    journeyZoomIn.addEventListener('click', () => setJourneyZoom(journeyZoom + .25));
+    journeyZoomReset.addEventListener('click', resetJourneyZoom);
+
+    journeyViewport.addEventListener('wheel', (event) => {
+      if (event.deltaY === 0) return;
+      event.preventDefault();
+      const bounds = journeyViewport.getBoundingClientRect();
+      setJourneyZoom(journeyZoom + (event.deltaY < 0 ? .25 : -.25), {
+        x: event.clientX - bounds.left,
+        y: event.clientY - bounds.top
+      });
+    }, { passive: false });
+
+    journeyViewport.addEventListener('keydown', (event) => {
+      if (event.key === '+' || event.key === '=') setJourneyZoom(journeyZoom + .25);
+      if (event.key === '-') setJourneyZoom(journeyZoom - .25);
+      if (event.key === '0') resetJourneyZoom();
+    });
+
+    journeyViewport.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'mouse' || event.button !== 0 || journeyZoom <= 1) return;
+      journeyDrag = {
+        x: event.clientX,
+        y: event.clientY,
+        left: journeyViewport.scrollLeft,
+        top: journeyViewport.scrollTop
+      };
+      journeyViewport.classList.add('is-dragging');
+      journeyViewport.setPointerCapture(event.pointerId);
+    });
+
+    journeyViewport.addEventListener('pointermove', (event) => {
+      if (!journeyDrag) return;
+      journeyViewport.scrollLeft = journeyDrag.left - (event.clientX - journeyDrag.x);
+      journeyViewport.scrollTop = journeyDrag.top - (event.clientY - journeyDrag.y);
+    });
+
+    function stopJourneyDrag(event) {
+      if (!journeyDrag) return;
+      journeyDrag = null;
+      journeyViewport.classList.remove('is-dragging');
+      if (journeyViewport.hasPointerCapture(event.pointerId)) journeyViewport.releasePointerCapture(event.pointerId);
+    }
+
+    journeyViewport.addEventListener('pointerup', stopJourneyDrag);
+    journeyViewport.addEventListener('pointercancel', stopJourneyDrag);
+
+    previewButtons.forEach((button, index) => {
+      button.addEventListener('click', () => openLightbox(index));
+    });
+
+    document.querySelectorAll('[aria-controls^="function-"]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const panel = document.getElementById(button.getAttribute('aria-controls'));
+        const expanded = button.getAttribute('aria-expanded') === 'true';
+        button.setAttribute('aria-expanded', String(!expanded));
+        panel.hidden = expanded;
+      });
+    });
+
+    lightbox.querySelectorAll('[data-lightbox-close]').forEach((button) => {
+      button.addEventListener('click', closeLightbox);
+    });
+    lightbox.querySelector('[data-lightbox-prev]').addEventListener('click', () => moveLightbox(-1));
+    lightbox.querySelector('[data-lightbox-next]').addEventListener('click', () => moveLightbox(1));
+
+    document.addEventListener('keydown', (event) => {
+      if (lightbox.hidden) return;
+      if (event.key === 'Escape') closeLightbox();
+      if (event.key === 'ArrowLeft') moveLightbox(-1);
+      if (event.key === 'ArrowRight') moveLightbox(1);
+    });
+
+    document.querySelectorAll('img').forEach((image) => {
+      image.addEventListener('error', () => {
+        if (image.dataset.errorHandled === 'true') return;
+        image.dataset.errorHandled = 'true';
+        image.hidden = true;
+        const fallback = document.createElement('span');
+        fallback.className = 'image-error';
+        fallback.textContent = `图片未找到：${image.getAttribute('src')}`;
+        image.insertAdjacentElement('afterend', fallback);
+      });
+    });
+
+    if ('IntersectionObserver' in window) {
+      const navigationLinks = Array.from(document.querySelectorAll('body > nav a'));
+      const sections = navigationLinks
+        .map((link) => document.querySelector(link.getAttribute('href')))
+        .filter(Boolean);
+      const observer = new IntersectionObserver((entries) => {
+        const active = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (!active) return;
+        navigationLinks.forEach((link) => {
+          const selected = link.getAttribute('href') === `#${active.target.id}`;
+          if (selected) link.setAttribute('aria-current', 'true');
+          else link.removeAttribute('aria-current');
+        });
+      }, { rootMargin: '-25% 0px -60%', threshold: [0, .2, .5] });
+      sections.forEach((section) => observer.observe(section));
+    }
+  </script>
+</body>
+</html>
