@@ -26,9 +26,15 @@ foreach ($ref in $refs) {
   if ($ref -notin $manifest) { throw "HTML reference is absent from manifest: $ref" }
 }
 if (Test-Path -LiteralPath (Join-Path $Root '.git')) {
-  $tracked = @(git -C $Root ls-files)
-  $unexpected = @($tracked | Where-Object { $_ -notin $manifest })
-  if ($unexpected.Count) { throw "Unexpected tracked files: $($unexpected -join ', ')" }
+  $tracked = @(git -c core.quotepath=false -C $Root ls-files)
+  $manifestOnly = @($manifest | Where-Object { $_ -notin $tracked })
+  $trackedOnly = @($tracked | Where-Object { $_ -notin $manifest })
+  if ($manifestOnly.Count -or $trackedOnly.Count) {
+    $differences = @()
+    if ($manifestOnly.Count) { $differences += "Manifest files are not tracked: $($manifestOnly -join ', ')" }
+    if ($trackedOnly.Count) { $differences += "Tracked files are absent from manifest: $($trackedOnly -join ', ')" }
+    throw "Public file set mismatch: $($differences -join '; ')"
+  }
 }
 
 $textFiles = $manifest | Where-Object { [IO.Path]::GetExtension($_) -in @('.html', '.md', '.mmd', '.json', '.yml', '.yaml', '.ps1', '.mjs', '') }
