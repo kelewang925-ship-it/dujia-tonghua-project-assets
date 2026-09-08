@@ -54,6 +54,10 @@ const requiredTableFields = {
 function validateDatabase(text) {
   const headings = [...text.matchAll(/^### `([a-z][a-z0-9_]*)`\s*$/gm)];
   const tableNames = headings.map((match) => match[1]);
+  const tableSections = new Map(headings.map((heading, index) => [
+    heading[1],
+    text.slice(heading.index, headings[index + 1]?.index ?? text.length),
+  ]));
   for (const table of expectedTables) {
     if (!tableNames.includes(table)) throw new Error(`Missing backend table: ${table}`);
   }
@@ -124,6 +128,46 @@ function validateDatabase(text) {
   if (!text.includes('| `source_type` | varchar(16) | 否 | — | RECORD/PHOTO_ITEM/MOMENT |') ||
       !text.includes('| `source_type` | varchar(16) | 否 | — | RECORD/PHOTO_ITEM/MOMENT/WORK |')) {
     throw new Error('Generic source references must use the closed non-pet source enums');
+  }
+  if (!tableSections.get('async_jobs').includes('ACCOUNT_DELETION') ||
+      !tableSections.get('account_deletion_requests').includes('job_type=ACCOUNT_DELETION')) {
+    throw new Error('Account deletion requests need an executable ACCOUNT_DELETION async job contract');
+  }
+  const orderingContracts = {
+    memory_book_chapters: [
+      'CONSTRAINT TRIGGER memory_book_chapters_live_position_ck',
+      'DEFERRABLE INITIALLY DEFERRED',
+      'Prisma migration SQL',
+    ],
+    memory_book_pages: [
+      'CONSTRAINT TRIGGER memory_book_pages_live_position_ck',
+      'DEFERRABLE INITIALLY DEFERRED',
+      'Prisma migration SQL',
+    ],
+    memory_book_page_sources: [
+      'UNIQUE (page_id, position) DEFERRABLE INITIALLY DEFERRED',
+      'Prisma migration SQL',
+    ],
+  };
+  for (const [table, contracts] of Object.entries(orderingContracts)) {
+    const section = tableSections.get(table);
+    if (/未删除行延迟唯一/.test(section) || contracts.some((contract) => !section.includes(contract))) {
+      throw new Error(`Unimplementable or incomplete deferred ordering contract: ${table}`);
+    }
+  }
+  const requiredForeignKeyIndexes = {
+    ai_jobs: ['draft_id'],
+    subscriptions: ['plan_id'],
+    notifications: ['couple_id'],
+  };
+  for (const [table, fields] of Object.entries(requiredForeignKeyIndexes)) {
+    const indexText = tableSections.get(table).match(/索引：([^。]+)/)?.[1] ?? '';
+    const indexSpecs = indexText.split('、').map((spec) => spec.trim());
+    for (const field of fields) {
+      if (!indexSpecs.some((spec) => spec === field || new RegExp(`^\\(${field}(?:,|\\))`).test(spec))) {
+        throw new Error(`Missing left-prefix B-tree index for foreign key: ${table}.${field}`);
+      }
+    }
   }
   console.log('PASS: 54 unique database tables; six-column fields, constraints, indexes, lifecycle and scope');
 }
