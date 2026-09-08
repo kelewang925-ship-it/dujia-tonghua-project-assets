@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFF9F0"/>
+      <stop offset="100%" stop-color="#F7E7D6"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFF4C9" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#FFD8BE" stop-opacity="0.15"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#8B5E3C" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+
+  <!-- full immersive room -->
+  <rect width="1080" height="1920" fill="url(#bg)"/>
+  <rect x="0" y="0" width="410" height="870" fill="#EAF6FF"/>
+  <rect x="35" y="60" width="340" height="780" rx="18" fill="#DFF2FF" stroke="#C89B72" stroke-width="22"/>
+  <line x1="205" y1="60" x2="205" y2="840" stroke="#C89B72" stroke-width="15"/>
+  <line x1="35" y1="430" x2="375" y2="430" stroke="#C89B72" stroke-width="15"/>
+  <ellipse cx="295" cy="390" rx="420" ry="520" fill="url(#sun)"/>
+
+  <!-- room objects -->
+  <rect x="760" y="170" width="220" height="300" rx="24" fill="#B9845B" opacity="0.24"/>
+  <rect x="710" y="420" width="270" height="26" rx="13" fill="#9B6B48"/>
+  <rect x="735" y="445" width="18" height="410" rx="9" fill="#9B6B48"/>
+  <rect x="932" y="445" width="18" height="410" rx="9" fill="#9B6B48"/>
+  <circle cx="780" cy="385" r="48" fill="#A8BA8A"/>
+  <circle cx="835" cy="355" r="62" fill="#B6C79A"/>
+  <circle cx="885" cy="392" r="46" fill="#9FB584"/>
+  <rect x="820" y="410" width="74" height="68" rx="10" fill="#E9C9AA"/>
+
+  <rect x="120" y="1080" width="840" height="420" rx="210" fill="#EFD7BF" opacity="0.64"/>
+  <ellipse cx="540" cy="1388" rx="360" ry="118" fill="#F2DEC7"/>
+  <circle cx="175" cy="1315" r="48" fill="#F2A0A0"/>
+  <line x1="130" y1="1500" x2="230" y2="1445" stroke="#6C98B9" stroke-width="24" stroke-linecap="round"/>
+
+  <!-- top bar -->
+  <circle cx="88" cy="92" r="48" fill="#FFF9F3" stroke="#E8C8A8" stroke-width="4"/>
+  <path d="M105 62 L76 92 L105 122" fill="none" stroke="#9D6846" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <g filter="url(#shadow)">
+    <rect x="315" y="48" width="450" height="98" rx="26" fill="#FFF8ED"/>
+  </g>
+  <text x="540" y="111" font-size="48" text-anchor="middle" fill="#6E452F" font-family="serif">糯米的小屋 ♡</text>
+
+  <g filter="url(#shadow)">
+    <rect x="350" y="165" width="380" height="84" rx="42" fill="#FFF9F3"/>
+  </g>
+  <circle cx="400" cy="207" r="34" fill="#F7C6B4"/>
+  <circle cx="680" cy="207" r="34" fill="#E6B894"/>
+  <text x="540" y="220" font-size="34" text-anchor="middle" fill="#6E452F" font-family="serif">小满  ×  阿舟</text>
+
+  <circle cx="865" cy="92" r="44" fill="#FFF9F3" stroke="#E8C8A8" stroke-width="3"/>
+  <circle cx="965" cy="92" r="44" fill="#FFF9F3" stroke="#E8C8A8" stroke-width="3"/>
+  <text x="865" y="108" font-size="40" text-anchor="middle" fill="#9B6B48">▧</text>
+  <text x="965" y="108" font-size="38" text-anchor="middle" fill="#9B6B48">•••</text>
+
+  <!-- intimacy card -->
+  <g filter="url(#shadow)">
+    <rect x="50" y="285" width="210" height="210" rx="28" fill="#FFF9F3" stroke="#E9C6A3" stroke-width="4" stroke-dasharray="12 10"/>
+  </g>
+  <text x="86" y="348" font-size="26" fill="#7B4D34" font-family="serif">♡ 亲密度</text>
+  <text x="155" y="418" font-size="60" text-anchor="middle" fill="#E9785D" font-family="serif">128</text>
+  <rect x="82" y="445" width="145" height="14" rx="7" fill="#EEDBC7"/>
+  <rect x="82" y="445" width="102" height="14" rx="7" fill="#E9785D"/>
+  <text x="155" y="485" font-size="22" text-anchor="middle" fill="#7B4D34">Lv.2 陪伴中</text>
+
+  <!-- mood card -->
+  <g filter="url(#shadow)">
+    <rect x="755" y="275" width="270" height="130" rx="28" fill="#FFF9F3"/>
+  </g>
+  <text x="790" y="325" font-size="28" fill="#E5A646">☀</text>
+  <text x="828" y="325" font-size="26" fill="#6E452F" font-family="serif">今天天气真好，</text>
+  <text x="825" y="365" font-size="26" fill="#6E452F" font-family="serif">一起玩一会儿吧！</text>
+
+  <!-- stylized puppy as 3D placeholder -->
+  <g filter="url(#shadow)">
+    <ellipse cx="540" cy="1035" rx="250" ry="305" fill="#FFF6E8"/>
+    <ellipse cx="385" cy="890" rx="120" ry="160" fill="#F7E7CF"/>
+    <ellipse cx="695" cy="890" rx="120" ry="160" fill="#F7E7CF"/>
+    <circle cx="540" cy="875" r="205" fill="#FFF6E8"/>
+    <circle cx="475" cy="850" r="22" fill="#4A2E21"/>
+    <circle cx="605" cy="850" r="22" fill="#4A2E21"/>
+    <ellipse cx="540" cy="920" rx="34" ry="25" fill="#3D281E"/>
+    <path d="M505 955 Q540 990 575 955" fill="none" stroke="#9A5B4A" stroke-width="10" stroke-linecap="round"/>
+    <ellipse cx="415" cy="1220" rx="86" ry="130" fill="#FFF6E8"/>
+    <ellipse cx="665" cy="1220" rx="86" ry="130" fill="#FFF6E8"/>
+    <path d="M435 1010 L645 1010 L610 1130 L470 1130 Z" fill="#F6C4B8"/>
+    <circle cx="540" cy="1070" r="18" fill="#E9785D"/>
+    <path d="M775 1020 Q900 940 910 1060 Q900 1150 820 1120" fill="none" stroke="#FFF6E8" stroke-width="70" stroke-linecap="round"/>
+  </g>
+
+  <!-- interaction hints -->
+  <text x="320" y="725" font-size="30" fill="#FFFFFF" stroke="#9D6846" stroke-width="1.2" font-family="serif">点击头部</text>
+  <text x="320" y="765" font-size="30" fill="#FFFFFF" stroke="#9D6846" stroke-width="1.2" font-family="serif">摸摸它</text>
+  <path d="M420 780 L470 825" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round"/>
+
+  <text x="775" y="795" font-size="29" fill="#FFFFFF" stroke="#9D6846" stroke-width="1.2" font-family="serif">点击耳朵</text>
+  <text x="775" y="835" font-size="29" fill="#FFFFFF" stroke="#9D6846" stroke-width="1.2" font-family="serif">会有不同反应</text>
+  <path d="M760 845 L700 875" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round"/>
+
+  <text x="190" y="1115" font-size="29" fill="#FFFFFF" stroke="#9D6846" stroke-width="1.2" font-family="serif">点击身体</text>
+  <text x="190" y="1155" font-size="29" fill="#FFFFFF" stroke="#9D6846" stroke-width="1.2" font-family="serif">和它互动</text>
+  <path d="M310 1165 L390 1115" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round"/>
+
+  <text x="825" y="1080" font-size="29" fill="#FFFFFF" stroke="#9D6846" stroke-width="1.2" font-family="serif">点击尾巴</text>
+  <text x="825" y="1120" font-size="29" fill="#FFFFFF" stroke="#9D6846" stroke-width="1.2" font-family="serif">看看它的反应</text>
+
+  <!-- gesture guide -->
+  <g opacity="0.9">
+    <text x="185" y="1600" font-size="32" text-anchor="middle" fill="#FFFFFF">↔</text>
+    <text x="185" y="1645" font-size="26" text-anchor="middle" fill="#FFFFFF" font-family="serif">左右拖动</text>
+    <text x="185" y="1680" font-size="26" text-anchor="middle" fill="#FFFFFF" font-family="serif">360° 查看</text>
+
+    <text x="540" y="1600" font-size="32" text-anchor="middle" fill="#FFFFFF">⇱⇲</text>
+    <text x="540" y="1645" font-size="26" text-anchor="middle" fill="#FFFFFF" font-family="serif">双指缩放</text>
+    <text x="540" y="1680" font-size="26" text-anchor="middle" fill="#FFFFFF" font-family="serif">调整距离</text>
+
+    <text x="855" y="1600" font-size="32" text-anchor="middle" fill="#FFFFFF">↕</text>
+    <text x="855" y="1645" font-size="26" text-anchor="middle" fill="#FFFFFF" font-family="serif">上下滑动</text>
+    <text x="855" y="1680" font-size="26" text-anchor="middle" fill="#FFFFFF" font-family="serif">调整视角</text>
+  </g>
+
+  <text x="540" y="1788" font-size="32" text-anchor="middle" fill="#875B3F" font-family="serif">和你们在一起，每一天都很幸福 ♡</text>
+
+  <!-- single floating function entry -->
+  <g filter="url(#shadow)">
+    <circle cx="930" cy="1790" r="74" fill="#FFF9F3" stroke="#E8C8A8" stroke-width="5"/>
+  </g>
+  <circle cx="900" cy="1770" r="16" fill="#EA8A72"/>
+  <circle cx="928" cy="1756" r="16" fill="#EA8A72"/>
+  <circle cx="956" cy="1770" r="16" fill="#EA8A72"/>
+  <ellipse cx="930" cy="1810" rx="40" ry="32" fill="#EA8A72"/>
+  <text x="930" y="1885" font-size="22" text-anchor="middle" fill="#7B4D34">轻点打开功能面板</text>
+</svg>
