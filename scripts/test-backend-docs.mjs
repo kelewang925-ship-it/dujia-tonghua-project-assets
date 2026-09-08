@@ -58,6 +58,7 @@ function validateDatabase(text) {
     heading[1],
     text.slice(heading.index, headings[index + 1]?.index ?? text.length),
   ]));
+  const databaseOverview = text.slice(0, headings[0]?.index ?? text.length);
   for (const table of expectedTables) {
     if (!tableNames.includes(table)) throw new Error(`Missing backend table: ${table}`);
   }
@@ -155,6 +156,15 @@ function validateDatabase(text) {
       throw new Error(`Unimplementable or incomplete deferred ordering contract: ${table}`);
     }
   }
+  const softDeleteOrderingColumns = [
+    'memory_book_chapters.book_id',
+    'memory_book_pages.book_id',
+    'memory_book_supplements.page_id',
+  ];
+  if (/\bparent_id\b/.test(databaseOverview) ||
+      softDeleteOrderingColumns.some((mapping) => !databaseOverview.includes(mapping))) {
+    throw new Error('Soft-delete ordering DDL must name each table\'s actual parent column');
+  }
   const requiredForeignKeyIndexes = {
     ai_jobs: ['draft_id'],
     subscriptions: ['plan_id'],
@@ -168,6 +178,11 @@ function validateDatabase(text) {
         throw new Error(`Missing left-prefix B-tree index for foreign key: ${table}.${field}`);
       }
     }
+  }
+  const pageIndexText = tableSections.get('memory_book_pages').match(/索引：([^。]+)/)?.[1] ?? '';
+  if (!pageIndexText.split('、').map((spec) => spec.trim())
+      .includes('(book_id, position, id) WHERE deleted_at IS NULL')) {
+    throw new Error('Memory-book pages need a live whole-book position B-tree index');
   }
   console.log('PASS: 54 unique database tables; six-column fields, constraints, indexes, lifecycle and scope');
 }
