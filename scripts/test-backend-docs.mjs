@@ -456,7 +456,7 @@ function validateApiCatalog(text, quiet = false) {
       tables.add(match[1]);
     }
     if (!/读：|写：/.test(references)) throw new Error(`Missing table trace: ${route}`);
-    for (const match of `${request} ${response}`.matchAll(/\b[A-Z][a-z]+[A-Za-z0-9]*\b/g)) {
+    for (const match of `${request} ${response}`.matchAll(/\b[A-Z][A-Za-z0-9]*[a-z][A-Za-z0-9]*\b/g)) {
       if (!allowedDtoReferences.has(match[0])) throw new Error(`Unknown API DTO reference: ${route} → ${match[0]}`);
     }
     for (const match of errors.matchAll(/\b[A-Z][A-Z_]{2,}\b/g)) {
@@ -523,6 +523,12 @@ function validateApiCatalog(text, quiet = false) {
       !/受邀者最小资料/.test(coupleCurrent[7])) {
     throw new Error('Couple current state must cover inviter/invitee lookup and minimal counterpart verification');
   }
+  const pendingSensitiveField = /(?:^|[,\{])(?:code|phone(?:Number|Last4)?|birthday|bio):/i;
+  if (pendingSensitiveField.test(dtoDefinitions.get('Invitation')) ||
+      pendingSensitiveField.test(coupleCurrent[5]) ||
+      !/不返回 code\/手机号\/生日\/简介/.test(coupleCurrent[7])) {
+    throw new Error('Pending invitation response must not expose sensitive fields');
+  }
   for (const invitationRow of [invitationCancel, invitationAccept, invitationConfirm]) {
     if (!/`couple_members`/.test(invitationRow[7]) || !/leftAt/.test(invitationRow[7])) {
       throw new Error(`Invitation lifecycle must release stale PENDING membership: ${invitationRow[1]}`);
@@ -531,14 +537,20 @@ function validateApiCatalog(text, quiet = false) {
   if (!/双方各自创建邀请.*同一事务.*一个目标关系/.test(text)) {
     throw new Error('Invitation acceptance matrix must cover two users with competing PENDING invitations');
   }
-  for (const route of [
+  if (!text.includes('`Bearer 双方`：必须属于资源当前 ACTIVE 情侣关系。')) {
+    throw new Error('Bearer parties must remain ACTIVE-only');
+  }
+  const expectedDissolvingRoutes = [
     'GET /api/v1/couples/current/dissolutions/current',
     'POST /api/v1/couples/current/dissolutions/current/confirm',
     'DELETE /api/v1/couples/current/dissolutions/current',
-  ]) {
-    if (!rowByRoute.get(route)[2].startsWith('Bearer 解除中双方')) {
-      throw new Error(`Dissolving relationship endpoint needs its dedicated membership guard: ${route}`);
-    }
+  ];
+  const actualDissolvingRoutes = rows
+    .filter((row) => row[2].startsWith('Bearer 解除中双方'))
+    .map((row) => `${row[0]} ${row[1].replaceAll('`', '')}`);
+  if (actualDissolvingRoutes.length !== expectedDissolvingRoutes.length ||
+      expectedDissolvingRoutes.some((route) => !actualDissolvingRoutes.includes(route))) {
+    throw new Error('Dissolving relationship endpoints need a dedicated membership guard limited to the three lifecycle routes');
   }
   const jobFields = dtoDefinitions.get('Job');
   if (!/jobId:uuid/.test(jobFields) || !/asyncJobId:uuid/.test(jobFields) ||
@@ -552,7 +564,8 @@ function validateApiCatalog(text, quiet = false) {
   const fileDownload = endpoint('GET', '/api/v1/files/{fileId}/download-url');
   if (!/resourceType:AVATAR\/COUPLE\/RECORD\/MOMENT\//.test(fileDownload[4]) ||
       !/`couples`/.test(fileDownload[7]) || !/`important_moments`/.test(fileDownload[7]) ||
-      !/coverFileId/.test(fileDownload[7]) || !/当前 ACTIVE 关系/.test(fileDownload[7])) {
+      !/`moment_record_links`/.test(fileDownload[7]) || !/coverFileId/.test(fileDownload[7]) ||
+      !/当前 ACTIVE 关系/.test(fileDownload[7]) || !/复核其来源权限/.test(fileDownload[7])) {
     throw new Error('File download context must authorize COUPLE and MOMENT cover references');
   }
   for (const contract of ['RECORD/PHOTO_ITEM/MOMENT/WORK', 'Idempotency-Key', 'sourceVersion', 'PRIVATE', 'COUPLE',
@@ -576,17 +589,40 @@ function validateApiCatalogMutations(text) {
     ['missing endpoint', /Missing required endpoint/, (source) => source.replace(endpointLine('/api/v1/system/releases/latest'), '')],
     ['unknown error', /Unknown API error code/, (source) => source.replace('EA | 读：`users`', 'EA + UNKNOWN_FAILURE | 读：`users`')],
     ['unknown DTO', /Unknown API DTO reference/, (source) => source.replace('200 User | EA | 读：`users`', '200 UnknownDto | EA | 读：`users`')],
+    ['unknown acronym DTO AIJob', /Unknown API DTO reference/, (source) => source.replace('202 Job | EA + RESOURCE_NOT_FOUND', '202 AIJob | EA + RESOURCE_NOT_FOUND')],
+    ['unknown acronym DTO URLPayload', /Unknown API DTO reference/, (source) => source.replace('200 Download | EA + RESOURCE_NOT_FOUND', '200 URLPayload | EA + RESOURCE_NOT_FOUND')],
     ['anonymous users me', /must require the authenticated user/, (source) => source.replace(
       '| GET | `/api/v1/users/me` | Bearer 本人 |', '| GET | `/api/v1/users/me` | 匿名 |')],
     ['missing invitation cleanup', /release stale PENDING membership/, (source) => source.replace(
       /(`\/api\/v1\/couples\/invitations\/\{code\}\/accept`[^\r\n]+)leftAt/, '$1releasedAt')],
     ['missing pending counterpart', /minimal counterpart verification/, (source) => source.replace('pendingCounterpart', 'pendingPeer')],
+    ['pending invitation leaks code', /must not expose sensitive fields/, (source) => source.replace(
+      '| `Invitation` | id,status:', '| `Invitation` | id,code:string,status:')],
+    ['pending counterpart leaks phone', /must not expose sensitive fields/, (source) => source.replace(
+      'pendingCounterpart:{userId,', 'pendingCounterpart:{userId,phone:string,')],
+    ['pending counterpart leaks birthday', /must not expose sensitive fields/, (source) => source.replace(
+      'pendingCounterpart:{userId,', 'pendingCounterpart:{userId,birthday:date,')],
+    ['pending counterpart leaks bio', /must not expose sensitive fields/, (source) => source.replace(
+      'pendingCounterpart:{userId,', 'pendingCounterpart:{userId,bio:string,')],
+    ['Bearer parties expanded to DISSOLVING', /Bearer parties must remain ACTIVE-only/, (source) => source.replace(
+      '当前 ACTIVE 情侣关系', 'ACTIVE/DISSOLVING 情侣关系')],
     ['active guard reused while dissolving', /dedicated membership guard/, (source) => source.replace(
       '| GET | `/api/v1/couples/current/dissolutions/current` | Bearer 解除中双方',
       '| GET | `/api/v1/couples/current/dissolutions/current` | Bearer 双方')],
+    ['ordinary couple write uses dissolving guard', /dedicated membership guard/, (source) => source.replace(
+      '| PATCH | `/api/v1/couples/current` | Bearer 双方；仅 ACTIVE |',
+      '| PATCH | `/api/v1/couples/current` | Bearer 解除中双方；仅 DISSOLVING |')],
     ['missing async job version', /Job DTO must distinguish/, (source) => source.replace('version:integer（`async_jobs.version`）', 'jobRevision:integer')],
     ['missing couple file context', /File download context/, (source) => source.replace(
       'resourceType:AVATAR/COUPLE/RECORD/MOMENT/', 'resourceType:AVATAR/RECORD/MOMENT/')],
+    ['missing moment source link', /File download context/, (source) => {
+      const line = endpointLine('/api/v1/files/{fileId}/download-url');
+      return source.replace(line, line.replace('、`moment_record_links`', ''));
+    }],
+    ['missing moment source authorization', /File download context/, (source) => {
+      const line = endpointLine('/api/v1/files/{fileId}/download-url');
+      return source.replace(line, line.replace('并复核其来源权限', '并跳过来源权限'));
+    }],
   ];
   for (const [label, expectedError, mutate] of mutations) {
     const mutated = mutate(text);
