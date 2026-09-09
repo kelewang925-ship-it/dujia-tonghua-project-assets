@@ -44,6 +44,25 @@ const expectedTableOwners = {
   jobs: ['async_jobs'],
   system: ['feedback_tickets', 'legal_documents', 'app_releases', 'audit_logs'],
 };
+const allowedApiErrorCodes = new Set([
+  'AUTH_REQUIRED', 'TOKEN_EXPIRED', 'INVALID_CREDENTIALS', 'SMS_CODE_INVALID',
+  'RATE_LIMITED', 'COUPLE_REQUIRED', 'COUPLE_ACCESS_DENIED', 'RESOURCE_NOT_FOUND',
+  'RESOURCE_VERSION_CONFLICT', 'PRIVATE_RESOURCE', 'IDEMPOTENCY_CONFLICT',
+  'VALIDATION_FAILED', 'QUOTA_EXCEEDED', 'INSUFFICIENT_CREDITS',
+  'FILE_ACCESS_DENIED', 'JOB_FAILED', 'INTERNAL_ERROR',
+]);
+const expectedApiDtos = [
+  'DeviceInput', 'ReauthInput', 'User', 'Tokens', 'Session', 'Deletion', 'Couple',
+  'Member', 'Invitation', 'Dissolution', 'RecordInput', 'RecordSummary', 'DiaryInput',
+  'Diary', 'PhotoInput', 'PhotoItem', 'PhotoSetInput', 'PhotoSet', 'Tag', 'ResponseInput',
+  'Response', 'MomentInput', 'Moment', 'AnniversaryInput', 'Anniversary', 'Reminder',
+  'CapsuleInput', 'CapsuleItemInput', 'CapsuleMeta', 'CapsuleContent', 'SourceInput',
+  'Source', 'DraftInput', 'GenerationParameters', 'Draft', 'CharacterInput', 'Character',
+  'Job', 'Work', 'Plan', 'Order', 'BookInput', 'Book', 'Chapter', 'BookPage',
+  'BookSourceInput', 'BookSource', 'Layout', 'SupplementInput', 'Supplement', 'Settings',
+  'Privacy', 'NotificationSettings', 'Notification', 'UploadInput', 'Upload', 'File',
+  'Download', 'Feedback',
+];
 const requiredDatabaseContracts = [
   '`records` 统一承载日记与照片集合',
   '限制每个有效关系最多两名',
@@ -374,8 +393,10 @@ GET /system/releases/latest
 `.trim().split('\n').map((line) => line.replace(' /', ' /api/v1/'));
 
 function validateApiCatalog(text, quiet = false) {
+  const endpointLines = text.split(/\r?\n/).filter((line) => /^\| [A-Z]+ \| `\/api\/v1\//.test(line));
   const rows = text.split(/\r?\n/).filter((line) => /^\| (GET|POST|PUT|PATCH|DELETE) \|/.test(line))
     .map((line) => line.slice(1, -1).split('|').map((cell) => cell.trim()));
+  if (endpointLines.length !== rows.length) throw new Error('Unsupported HTTP method in API catalog');
   const routes = new Set(rows.map(([method, route]) => `${method} ${route.replaceAll('`', '')}`));
   const rowByRoute = new Map(rows.map((row) => [`${row[0]} ${row[1].replaceAll('`', '')}`, row]));
   const endpoint = (method, route) => rowByRoute.get(`${method} ${route}`);
@@ -386,6 +407,10 @@ function validateApiCatalog(text, quiet = false) {
   }
   for (const requiredEndpoint of requiredEndpoints) {
     if (!routes.has(requiredEndpoint)) throw new Error(`Missing required endpoint: ${requiredEndpoint}`);
+  }
+  if (routes.size !== requiredEndpoints.length) {
+    const unexpected = [...routes].find((route) => !requiredEndpoints.includes(route));
+    throw new Error(`Unexpected API endpoint: ${unexpected ?? 'unknown'}`);
   }
   for (const method of ['GET', 'POST', 'PATCH', 'DELETE']) {
     if (!rows.some((row) => row[0] === method)) throw new Error(`Missing required HTTP method: ${method}`);
@@ -402,6 +427,17 @@ function validateApiCatalog(text, quiet = false) {
   if (/待定|按需(?:补充|增加)|后续补充|稍后填写|\bTODO\b|\bTBD\b|内容省略|诸如此类/.test(text)) {
     throw new Error('API contains an unfinished placeholder');
   }
+  const dtoSection = text.match(/^## 公共 DTO 与字段白名单\s*\r?\n([\s\S]*?)(?=^## )/m)?.[1] ?? '';
+  const dtoRows = dtoSection.split(/\r?\n/)
+    .filter((line) => /^\| `[A-Z][A-Za-z0-9]*` \|/.test(line))
+    .map((line) => line.slice(1, -1).split('|').map((cell) => cell.trim()));
+  const dtoDefinitions = new Map(dtoRows.map(([name, fields]) => [name.replaceAll('`', ''), fields]));
+  if (dtoRows.length !== expectedApiDtos.length || dtoDefinitions.size !== expectedApiDtos.length ||
+      expectedApiDtos.some((dto) => !dtoDefinitions.has(dto)) ||
+      [...dtoDefinitions.keys()].some((dto) => !expectedApiDtos.includes(dto))) {
+    throw new Error('API DTO dictionary must match the approved whitelist');
+  }
+  const allowedDtoReferences = new Set([...expectedApiDtos, 'PageQuery', 'List', 'Authorization']);
   const tables = new Set();
   for (const row of rows) {
     if (row.length !== 9 || row.some((cell) => !cell || cell === '—')) throw new Error(`Incomplete endpoint fields: ${row[1]}`);
@@ -420,6 +456,12 @@ function validateApiCatalog(text, quiet = false) {
       tables.add(match[1]);
     }
     if (!/读：|写：/.test(references)) throw new Error(`Missing table trace: ${route}`);
+    for (const match of `${request} ${response}`.matchAll(/\b[A-Z][a-z]+[A-Za-z0-9]*\b/g)) {
+      if (!allowedDtoReferences.has(match[0])) throw new Error(`Unknown API DTO reference: ${route} → ${match[0]}`);
+    }
+    for (const match of errors.matchAll(/\b[A-Z][A-Z_]{2,}\b/g)) {
+      if (!allowedApiErrorCodes.has(match[0])) throw new Error(`Unknown API error code: ${route} → ${match[0]}`);
+    }
     const params = [...route.matchAll(/\{([^}]+)\}/g)].map((match) => match[1]);
     for (const param of params) if (!request.includes(param)) throw new Error(`Undocumented path parameter: ${route}: ${param}`);
   }
@@ -468,11 +510,96 @@ function validateApiCatalog(text, quiet = false) {
       !/已退款时只能创建新草稿与新任务/.test(text)) {
     throw new Error('AI retry must reuse an unsettled reservation; refunded work requires a new draft and job');
   }
+  for (const method of ['GET', 'PATCH']) {
+    if (!endpoint(method, '/api/v1/users/me')[2].startsWith('Bearer 本人')) {
+      throw new Error(`${method} /api/v1/users/me must require the authenticated user`);
+    }
+  }
+  const coupleCurrent = endpoint('GET', '/api/v1/couples/current');
+  const invitationCancel = endpoint('DELETE', '/api/v1/couples/invitations/{invitationId}');
+  const invitationAccept = endpoint('POST', '/api/v1/couples/invitations/{code}/accept');
+  const invitationConfirm = endpoint('POST', '/api/v1/couples/invitations/{invitationId}/confirm');
+  if (!/inviter\/invitee/.test(coupleCurrent[2]) || !/pendingCounterpart/.test(coupleCurrent[5]) ||
+      !/受邀者最小资料/.test(coupleCurrent[7])) {
+    throw new Error('Couple current state must cover inviter/invitee lookup and minimal counterpart verification');
+  }
+  for (const invitationRow of [invitationCancel, invitationAccept, invitationConfirm]) {
+    if (!/`couple_members`/.test(invitationRow[7]) || !/leftAt/.test(invitationRow[7])) {
+      throw new Error(`Invitation lifecycle must release stale PENDING membership: ${invitationRow[1]}`);
+    }
+  }
+  if (!/双方各自创建邀请.*同一事务.*一个目标关系/.test(text)) {
+    throw new Error('Invitation acceptance matrix must cover two users with competing PENDING invitations');
+  }
+  for (const route of [
+    'GET /api/v1/couples/current/dissolutions/current',
+    'POST /api/v1/couples/current/dissolutions/current/confirm',
+    'DELETE /api/v1/couples/current/dissolutions/current',
+  ]) {
+    if (!rowByRoute.get(route)[2].startsWith('Bearer 解除中双方')) {
+      throw new Error(`Dissolving relationship endpoint needs its dedicated membership guard: ${route}`);
+    }
+  }
+  const jobFields = dtoDefinitions.get('Job');
+  if (!/jobId:uuid/.test(jobFields) || !/asyncJobId:uuid/.test(jobFields) ||
+      !/version:integer/.test(jobFields) || !/async_jobs\.version/.test(jobFields)) {
+    throw new Error('Job DTO must distinguish business/execution IDs and expose async_jobs.version');
+  }
+  const exportDelete = endpoint('DELETE', '/api/v1/data-exports/{jobId}');
+  if (!/query:version/.test(exportDelete[4]) || !/jobId,asyncJobId,version/.test(exportDelete[5])) {
+    throw new Error('Data-export deletion must round-trip the async job version and both job identifiers');
+  }
+  const fileDownload = endpoint('GET', '/api/v1/files/{fileId}/download-url');
+  if (!/resourceType:AVATAR\/COUPLE\/RECORD\/MOMENT\//.test(fileDownload[4]) ||
+      !/`couples`/.test(fileDownload[7]) || !/`important_moments`/.test(fileDownload[7]) ||
+      !/coverFileId/.test(fileDownload[7]) || !/当前 ACTIVE 关系/.test(fileDownload[7])) {
+    throw new Error('File download context must authorize COUPLE and MOMENT cover references');
+  }
   for (const contract of ['RECORD/PHOTO_ITEM/MOMENT/WORK', 'Idempotency-Key', 'sourceVersion', 'PRIVATE', 'COUPLE',
     '令牌族', '预扣', '来源链', 'BullMQ', '## Worker 与跨模块追踪', '## 反向验收矩阵']) {
     if (!text.includes(contract)) throw new Error(`Missing API cross-domain contract: ${contract}`);
   }
   if (!quiet) console.log(`PASS: ${rows.length} endpoints; 23 families; 7 modules; auth, DTO fields, transactions, stages and 54 table references`);
+}
+
+function validateApiCatalogMutations(text) {
+  const endpointLine = (route) => text.split(/\r?\n/).find((line) => line.includes(`\`${route}\``));
+  const mutations = [
+    ['extra endpoint', /Unexpected API endpoint/, (source) => {
+      const line = endpointLine('/api/v1/users/me');
+      return source.replace(line, `${line}\n${line.replace('/api/v1/users/me`', '/api/v1/users/me/debug`')}`);
+    }],
+    ['unsupported method', /Unsupported HTTP method/, (source) => {
+      const line = endpointLine('/api/v1/users/me');
+      return source.replace(line, `${line}\n${line.replace('| GET |', '| HEAD |')}`);
+    }],
+    ['missing endpoint', /Missing required endpoint/, (source) => source.replace(endpointLine('/api/v1/system/releases/latest'), '')],
+    ['unknown error', /Unknown API error code/, (source) => source.replace('EA | 读：`users`', 'EA + UNKNOWN_FAILURE | 读：`users`')],
+    ['unknown DTO', /Unknown API DTO reference/, (source) => source.replace('200 User | EA | 读：`users`', '200 UnknownDto | EA | 读：`users`')],
+    ['anonymous users me', /must require the authenticated user/, (source) => source.replace(
+      '| GET | `/api/v1/users/me` | Bearer 本人 |', '| GET | `/api/v1/users/me` | 匿名 |')],
+    ['missing invitation cleanup', /release stale PENDING membership/, (source) => source.replace(
+      /(`\/api\/v1\/couples\/invitations\/\{code\}\/accept`[^\r\n]+)leftAt/, '$1releasedAt')],
+    ['missing pending counterpart', /minimal counterpart verification/, (source) => source.replace('pendingCounterpart', 'pendingPeer')],
+    ['active guard reused while dissolving', /dedicated membership guard/, (source) => source.replace(
+      '| GET | `/api/v1/couples/current/dissolutions/current` | Bearer 解除中双方',
+      '| GET | `/api/v1/couples/current/dissolutions/current` | Bearer 双方')],
+    ['missing async job version', /Job DTO must distinguish/, (source) => source.replace('version:integer（`async_jobs.version`）', 'jobRevision:integer')],
+    ['missing couple file context', /File download context/, (source) => source.replace(
+      'resourceType:AVATAR/COUPLE/RECORD/MOMENT/', 'resourceType:AVATAR/RECORD/MOMENT/')],
+  ];
+  for (const [label, expectedError, mutate] of mutations) {
+    const mutated = mutate(text);
+    if (mutated === text) throw new Error(`API mutation fixture drifted: ${label}`);
+    try {
+      validateApiCatalog(mutated, true);
+    } catch (error) {
+      if (expectedError.test(error.message)) continue;
+      throw new Error(`API mutation failed for the wrong reason (${label}): ${error.message}`);
+    }
+    throw new Error(`API validator accepted in-memory mutation: ${label}`);
+  }
+  console.log(`PASS: ${mutations.length} in-memory API catalog mutations rejected`);
 }
 const args = process.argv.slice(2);
 if (args.some((arg) => !['--focus=architecture-api', '--focus=database', '--focus=api-catalog'].includes(arg)) || args.length > 1) {
@@ -483,7 +610,11 @@ const selectedDocs = args[0] === '--focus=database' ? ['03-数据库设计.md'] 
 for (const name of selectedDocs) {
   const file = path.join(dir, name);
   if (name === '03-数据库设计.md') validateDatabase(fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '');
-  if (name === '04-模块API清单.md') validateApiCatalog(fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '');
+  if (name === '04-模块API清单.md') {
+    const apiCatalog = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
+    validateApiCatalog(apiCatalog);
+    validateApiCatalogMutations(apiCatalog);
+  }
   if (!fs.existsSync(file)) throw new Error(`Missing backend doc: ${name}`);
   const text = fs.readFileSync(file, 'utf8');
   if (!/^# /m.test(text) || text.length < 200) throw new Error(`Incomplete backend doc: ${name}`);
