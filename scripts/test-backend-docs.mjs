@@ -29,6 +29,21 @@ const expectedTables = [
   'file_variants', 'async_jobs', 'feedback_tickets', 'legal_documents',
   'app_releases', 'audit_logs',
 ];
+const expectedTableOwners = {
+  auth: ['user_sessions', 'sms_challenges', 'account_security_events'],
+  users: ['users', 'account_deletion_requests'],
+  couples: ['couples', 'couple_members', 'couple_invitations', 'couple_dissolutions'],
+  records: ['records', 'diary_entries', 'photo_sets', 'photo_items', 'tags', 'record_tags', 'record_responses', 'response_attachments'],
+  moments: ['important_moments', 'moment_record_links', 'anniversaries', 'shared_reminders', 'time_capsules', 'time_capsule_items'],
+  workshop: ['character_profiles', 'creation_drafts', 'creation_draft_sources', 'ai_jobs', 'ai_job_events', 'works', 'work_assets'],
+  'memory-books': ['memory_books', 'memory_book_chapters', 'memory_book_pages', 'memory_book_page_sources', 'memory_book_supplements', 'memory_book_reading_progress'],
+  membership: ['membership_plans', 'subscriptions', 'entitlement_grants', 'credit_wallets', 'credit_ledger'],
+  settings: ['user_settings', 'privacy_settings', 'notification_preferences'],
+  notifications: ['notifications', 'notification_deliveries'],
+  files: ['files', 'file_upload_sessions', 'file_variants'],
+  jobs: ['async_jobs'],
+  system: ['feedback_tickets', 'legal_documents', 'app_releases', 'audit_logs'],
+};
 const requiredDatabaseContracts = [
   '`records` 统一承载日记与照片集合',
   '限制每个有效关系最多两名',
@@ -197,14 +212,278 @@ const requiredContent = {
     'FILE_ACCESS_DENIED', 'JOB_FAILED', 'INTERNAL_ERROR',
   ],
 };
-const args = process.argv.slice(2);
-if (args.some((arg) => !['--focus=architecture-api', '--focus=database'].includes(arg)) || args.length > 1) {
-  throw new Error('Usage: node scripts/test-backend-docs.mjs [--focus=architecture-api|--focus=database]');
+const apiFamilies = [
+  'auth', 'users/me', 'couples', 'records', 'diaries', 'photo-sets', 'tags',
+  'responses', 'moments', 'anniversaries', 'reminders', 'time-capsules', 'workshop',
+  'ai-jobs', 'works', 'memory-books', 'membership', 'settings', 'notifications',
+  'files', 'data-exports', 'feedback', 'system',
+];
+// Literal acceptance baseline from the approved task's endpoint inventory.
+const requiredEndpoints = `
+POST /auth/sms-codes
+POST /auth/register
+POST /auth/login
+POST /auth/token/refresh
+POST /auth/logout
+POST /auth/password/reset/verify
+POST /auth/password/reset/confirm
+GET /auth/sessions
+DELETE /auth/sessions/{sessionId}
+GET /users/me
+PATCH /users/me
+POST /users/me/avatar-upload
+DELETE /users/me/avatar
+POST /users/me/password/change
+POST /users/me/deletion-requests
+GET /users/me/deletion-requests/current
+DELETE /users/me/deletion-requests/current
+GET /couples/current
+GET /couples/current/members
+PATCH /couples/current
+POST /couples/invitations
+GET /couples/invitations/{code}
+DELETE /couples/invitations/{invitationId}
+POST /couples/invitations/{code}/accept
+POST /couples/invitations/{invitationId}/confirm
+POST /couples/current/dissolutions
+GET /couples/current/dissolutions/current
+POST /couples/current/dissolutions/current/confirm
+DELETE /couples/current/dissolutions/current
+GET /records/home
+GET /records
+GET /records/search
+GET /records/{recordId}
+DELETE /records/{recordId}
+POST /diaries
+GET /diaries/{diaryId}
+PATCH /diaries/{diaryId}
+POST /photo-sets
+GET /photo-sets/{photoSetId}
+PATCH /photo-sets/{photoSetId}
+POST /photo-sets/{photoSetId}/items
+PATCH /photo-sets/{photoSetId}/items/order
+DELETE /photo-sets/{photoSetId}/items/{photoItemId}
+GET /tags
+POST /tags
+PATCH /tags/{tagId}
+DELETE /tags/{tagId}
+GET /records/{recordId}/responses
+POST /records/{recordId}/responses
+PATCH /responses/{responseId}
+DELETE /responses/{responseId}
+GET /responses/inbox
+GET /moments
+POST /moments
+GET /moments/{momentId}
+PATCH /moments/{momentId}
+DELETE /moments/{momentId}
+POST /moments/{momentId}/records
+DELETE /moments/{momentId}/records/{recordId}
+GET /anniversaries
+POST /anniversaries
+GET /anniversaries/{anniversaryId}
+PATCH /anniversaries/{anniversaryId}
+DELETE /anniversaries/{anniversaryId}
+GET /anniversaries/{anniversaryId}/countdown
+GET /reminders
+POST /reminders/{reminderId}/read
+POST /reminders/read-all
+GET /time-capsules
+POST /time-capsules
+GET /time-capsules/{capsuleId}
+PATCH /time-capsules/{capsuleId}
+DELETE /time-capsules/{capsuleId}
+POST /time-capsules/{capsuleId}/items
+DELETE /time-capsules/{capsuleId}/items/{itemId}
+POST /time-capsules/{capsuleId}/seal
+POST /time-capsules/{capsuleId}/open
+GET /workshop/overview
+GET /workshop/sources
+GET /workshop/drafts
+POST /workshop/drafts
+GET /workshop/drafts/{draftId}
+PATCH /workshop/drafts/{draftId}
+DELETE /workshop/drafts/{draftId}
+PUT /workshop/drafts/{draftId}/sources
+GET /workshop/character-profile
+PUT /workshop/character-profile
+POST /ai-jobs
+GET /ai-jobs/{jobId}
+POST /ai-jobs/{jobId}/cancel
+POST /ai-jobs/{jobId}/retry
+GET /works
+GET /works/{workId}
+DELETE /works/{workId}
+POST /works/{workId}/save-to-photo-set
+POST /works/{workId}/notify-partner
+GET /membership/plans
+GET /membership/me
+POST /membership/orders
+GET /membership/orders/{orderId}
+GET /membership/credits
+GET /membership/credits/ledger
+GET /memory-books
+POST /memory-books
+GET /memory-books/recommendations/monthly
+GET /memory-books/sources
+GET /memory-books/{bookId}
+PATCH /memory-books/{bookId}
+DELETE /memory-books/{bookId}
+GET /memory-books/{bookId}/chapters
+POST /memory-books/{bookId}/chapters
+PATCH /memory-books/{bookId}/chapters/{chapterId}
+DELETE /memory-books/{bookId}/chapters/{chapterId}
+PATCH /memory-books/{bookId}/chapters/order
+POST /memory-books/{bookId}/pages
+GET /memory-books/{bookId}/pages
+GET /memory-books/{bookId}/pages/{pageId}
+PATCH /memory-books/{bookId}/pages/{pageId}
+DELETE /memory-books/{bookId}/pages/{pageId}
+PATCH /memory-books/{bookId}/pages/order
+POST /memory-books/{bookId}/pages/{pageId}/sources
+DELETE /memory-books/{bookId}/pages/{pageId}/sources/{sourceId}
+POST /memory-books/{bookId}/pages/{pageId}/supplements
+PATCH /memory-books/{bookId}/pages/{pageId}/supplements/{supplementId}
+DELETE /memory-books/{bookId}/pages/{pageId}/supplements/{supplementId}
+PUT /memory-books/{bookId}/reading-progress
+GET /settings
+PATCH /settings
+GET /settings/privacy
+PATCH /settings/privacy
+GET /settings/notifications
+PATCH /settings/notifications
+GET /notifications
+POST /notifications/{notificationId}/read
+POST /notifications/read-all
+GET /files/storage-usage
+POST /files/upload-sessions
+POST /files/upload-sessions/{uploadId}/complete
+DELETE /files/upload-sessions/{uploadId}
+GET /files/{fileId}/download-url
+DELETE /files/{fileId}
+GET /data-exports
+POST /data-exports
+GET /data-exports/{jobId}
+GET /data-exports/{jobId}/download-url
+DELETE /data-exports/{jobId}
+POST /feedback
+GET /feedback
+GET /system/config
+GET /system/legal-documents/{documentType}
+GET /system/releases/latest
+`.trim().split('\n').map((line) => line.replace(' /', ' /api/v1/'));
+
+function validateApiCatalog(text, quiet = false) {
+  const rows = text.split(/\r?\n/).filter((line) => /^\| (GET|POST|PUT|PATCH|DELETE) \|/.test(line))
+    .map((line) => line.slice(1, -1).split('|').map((cell) => cell.trim()));
+  const routes = new Set(rows.map(([method, route]) => `${method} ${route.replaceAll('`', '')}`));
+  const rowByRoute = new Map(rows.map((row) => [`${row[0]} ${row[1].replaceAll('`', '')}`, row]));
+  const endpoint = (method, route) => rowByRoute.get(`${method} ${route}`);
+  for (const family of apiFamilies) {
+    if (!rows.some((row) => new RegExp(`^\`/api/v1/${family}(?:/|\`$)`).test(row[1]))) {
+      throw new Error(`Missing API path family: /api/v1/${family}`);
+    }
+  }
+  for (const requiredEndpoint of requiredEndpoints) {
+    if (!routes.has(requiredEndpoint)) throw new Error(`Missing required endpoint: ${requiredEndpoint}`);
+  }
+  for (const method of ['GET', 'POST', 'PATCH', 'DELETE']) {
+    if (!rows.some((row) => row[0] === method)) throw new Error(`Missing required HTTP method: ${method}`);
+  }
+  if (routes.size !== rows.length) throw new Error('Duplicated API method/path');
+  for (const module of ['01', '02', '03', '04', '05', '06', '08']) {
+    if (!new RegExp(`^## 模块 ${module}：`, 'm').test(text)) throw new Error(`Missing current module: ${module}`);
+  }
+  if (/^## 模块 (?!01|02|03|04|05|06|08)\d+/m.test(text)) throw new Error('Unplanned API module');
+  if (/\/api\/v1\/(?:friends|comments|blocks|reports|pets)(?:[\/\s`]|$)|\/(?:comments|replies|pets)(?:[\/\s`]|$)/i.test(text) ||
+      /\b(?:supabase\.|createClient\(|rpc\(|storage\.from\()|['`"](?:PUBLIC|FRIENDS|FRIEND|PET)['`"]/.test(text)) {
+    throw new Error('API contains an excluded route, visibility, source or legacy call');
+  }
+  if (/待定|按需(?:补充|增加)|后续补充|稍后填写|\bTODO\b|\bTBD\b|内容省略|诸如此类/.test(text)) {
+    throw new Error('API contains an unfinished placeholder');
+  }
+  const tables = new Set();
+  for (const row of rows) {
+    if (row.length !== 9 || row.some((cell) => !cell || cell === '—')) throw new Error(`Incomplete endpoint fields: ${row[1]}`);
+    const [method, route, permission, concurrency, request, response, errors, references, stage] = row;
+    if (!/^`\/api\/v1\/[a-zA-Z0-9{}\/-]+`$/.test(route) || !/^[0-8]$/.test(stage)) {
+      throw new Error(`Invalid endpoint path or development stage: ${route}`);
+    }
+    if (!/^(匿名|Bearer|刷新凭证|注销验证)/.test(permission) || !/^(200|201|202) /.test(response) ||
+        !/^(E0|EA)/.test(errors) || !/(只读|幂等|Idempotency-Key|[Vv]ersion|单次)/.test(concurrency)) {
+      throw new Error(`Unspecified auth/concurrency/response/error contract: ${route}`);
+    }
+    if (method !== 'GET' && !/事务：/.test(references)) throw new Error(`Missing write transaction: ${route}`);
+    if (method !== 'GET' && !/写：/.test(references)) throw new Error(`Missing write-table scope: ${route}`);
+    for (const match of references.matchAll(/`([a-z][a-z0-9_]*)`/g)) {
+      if (!expectedTables.includes(match[1])) throw new Error(`Unknown endpoint table: ${route} → ${match[1]}`);
+      tables.add(match[1]);
+    }
+    if (!/读：|写：/.test(references)) throw new Error(`Missing table trace: ${route}`);
+    const params = [...route.matchAll(/\{([^}]+)\}/g)].map((match) => match[1]);
+    for (const param of params) if (!request.includes(param)) throw new Error(`Undocumented path parameter: ${route}: ${param}`);
+  }
+  for (const table of expectedTables) if (!tables.has(table)) throw new Error(`Untraced database table: ${table}`);
+  const ownerSection = text.match(/^## 数据所有者映射\s*\r?\n([\s\S]*?)(?=^## )/m)?.[1] ?? '';
+  const ownerRows = ownerSection.split(/\r?\n/)
+    .filter((line) => /^\| `[a-z-]+` \|/.test(line))
+    .map((line) => line.slice(1, -1).split('|').map((cell) => cell.trim()));
+  const tableOwners = new Map(ownerRows.map(([owner, ownerTables]) => [
+    owner.replaceAll('`', ''),
+    [...ownerTables.matchAll(/`([a-z][a-z0-9_]*)`/g)].map((match) => match[1]),
+  ]));
+  for (const [owner, ownerTables] of Object.entries(expectedTableOwners)) {
+    const actual = tableOwners.get(owner) ?? [];
+    if (actual.length !== ownerTables.length || ownerTables.some((table) => !actual.includes(table))) {
+      throw new Error(`Incomplete API table-owner mapping: ${owner}`);
+    }
+  }
+  const mappedTables = [...tableOwners.values()].flat();
+  if (mappedTables.length !== expectedTables.length || new Set(mappedTables).size !== expectedTables.length ||
+      mappedTables.some((table) => !expectedTables.includes(table))) {
+    throw new Error('API table-owner mapping must cover each of the 54 tables exactly once');
+  }
+  const invitationCreate = endpoint('POST', '/api/v1/couples/invitations');
+  if (invitationCreate[5] !== '201 首次 {invitation:Invitation,code:string}；幂等回放 {invitation:{id,status}}' ||
+      /回放 code 为 null/.test(text)) {
+    throw new Error('Invitation replay must return only the stable invitation id/status without plaintext code');
+  }
+  const deletionCreate = endpoint('POST', '/api/v1/users/me/deletion-requests');
+  const deletionManagementRoutes = rows
+    .filter((row) => row[2].startsWith('注销验证'))
+    .map((row) => `${row[0]} ${row[1].replaceAll('`', '')}`);
+  const expectedDeletionRoutes = [
+    'GET /api/v1/users/me/deletion-requests/current',
+    'DELETE /api/v1/users/me/deletion-requests/current',
+  ];
+  if (!/全(?:部业务)?会话/.test(deletionCreate[7]) ||
+      deletionManagementRoutes.length !== expectedDeletionRoutes.length ||
+      expectedDeletionRoutes.some((route) => !deletionManagementRoutes.includes(route)) ||
+      expectedDeletionRoutes.some((route) => !rowByRoute.get(route)[4].includes('Authorization:Deletion'))) {
+    throw new Error('Deletion must revoke business sessions and expose only two restricted management endpoints');
+  }
+  const aiRetry = endpoint('POST', '/api/v1/ai-jobs/{jobId}/retry');
+  if (!/原 RESERVE 尚未 SETTLE\/RELEASE/.test(aiRetry[2]) ||
+      !/不插入第二笔 RESERVE/.test(aiRetry[7]) ||
+      !/已退款时只能创建新草稿与新任务/.test(text)) {
+    throw new Error('AI retry must reuse an unsettled reservation; refunded work requires a new draft and job');
+  }
+  for (const contract of ['RECORD/PHOTO_ITEM/MOMENT/WORK', 'Idempotency-Key', 'sourceVersion', 'PRIVATE', 'COUPLE',
+    '令牌族', '预扣', '来源链', 'BullMQ', '## Worker 与跨模块追踪', '## 反向验收矩阵']) {
+    if (!text.includes(contract)) throw new Error(`Missing API cross-domain contract: ${contract}`);
+  }
+  if (!quiet) console.log(`PASS: ${rows.length} endpoints; 23 families; 7 modules; auth, DTO fields, transactions, stages and 54 table references`);
 }
-const selectedDocs = args[0] === '--focus=database' ? ['03-数据库设计.md'] : args.length ? Object.keys(requiredContent) : docs;
+const args = process.argv.slice(2);
+if (args.some((arg) => !['--focus=architecture-api', '--focus=database', '--focus=api-catalog'].includes(arg)) || args.length > 1) {
+  throw new Error('Usage: node scripts/test-backend-docs.mjs [--focus=architecture-api|--focus=database|--focus=api-catalog]');
+}
+const selectedDocs = args[0] === '--focus=database' ? ['03-数据库设计.md'] :
+  args[0] === '--focus=api-catalog' ? ['04-模块API清单.md'] : args.length ? Object.keys(requiredContent) : docs;
 for (const name of selectedDocs) {
   const file = path.join(dir, name);
   if (name === '03-数据库设计.md') validateDatabase(fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '');
+  if (name === '04-模块API清单.md') validateApiCatalog(fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '');
   if (!fs.existsSync(file)) throw new Error(`Missing backend doc: ${name}`);
   const text = fs.readFileSync(file, 'utf8');
   if (!/^# /m.test(text) || text.length < 200) throw new Error(`Incomplete backend doc: ${name}`);
