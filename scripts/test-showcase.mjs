@@ -1,6 +1,10 @@
 import fs from 'node:fs';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+if (!/href="backend-design\.html"/.test(html)) {
+  throw new Error('Backend design entry is missing');
+}
+
 const links = [...html.matchAll(/<a(?=[^>]*href="#gallery")(?=[^>]*data-gallery-jump="(\d{2})")[^>]*>/g)]
   .map((match) => match[1]);
 const expected = ['01', '02', '03', '04', '05', '06', '07', '08'];

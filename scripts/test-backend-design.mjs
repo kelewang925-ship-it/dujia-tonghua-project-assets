@@ -10,6 +10,21 @@ const page = path.join(root, 'backend-design.html');
 assert.ok(fs.existsSync(page), 'backend-design.html does not exist');
 const html = fs.readFileSync(page, 'utf8');
 
+const sourceDocuments = [
+  '06-技术与开发/后端设计/README.md',
+  '06-技术与开发/后端设计/01-总体架构.md',
+  '06-技术与开发/后端设计/02-API通用规范.md',
+  '06-技术与开发/后端设计/03-数据库设计.md',
+  '06-技术与开发/后端设计/04-模块API清单.md',
+  '06-技术与开发/后端设计/05-文件与异步任务.md',
+  '06-技术与开发/后端设计/06-后端开发实施路线.md',
+  '06-技术与开发/后端设计/2026-09-08-Node后端架构与API数据设计规格.md',
+  '06-技术与开发/后端设计/2026-09-08-后端资料与公开页面实施计划.md',
+];
+for (const document of sourceDocuments) {
+  assert.match(html, new RegExp(`href="${document}"`), `missing visible source-document link: ${document}`);
+}
+
 for (const selector of [
   'data-api-item', 'data-table-item', 'data-module-filter', 'data-method-filter', 'data-search', 'data-stage',
 ]) assert.match(html, new RegExp(selector), `missing ${selector}`);
