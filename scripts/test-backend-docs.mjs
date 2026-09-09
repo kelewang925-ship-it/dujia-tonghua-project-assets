@@ -663,6 +663,36 @@ function validateFileJobs(text, quiet = false) {
   if (!/不新增(?:表|状态)/.test(text)) {
     throw new Error('File/job design must state the closed table and state contract');
   }
+  const uploadSection = text.match(/^### 2\.2 [^\r\n]+\r?\n([\s\S]*?)(?=^### )/m)?.[1] ?? '';
+  if (!uploadSection.includes('If-None-Match: *')) {
+    throw new Error('Upload authorization must enforce the immutable no-overwrite condition');
+  }
+  if (!uploadSection.includes('已 complete/session 达终态后不得重新授权写入')) {
+    throw new Error('Terminal upload sessions must not be reauthorized for writes');
+  }
+  const virusSection = text.match(/^### 2\.3 [^\r\n]+\r?\n([\s\S]*?)(?=^## )/m)?.[1] ?? '';
+  for (const contract of [
+    'files: UPLOADING → QUARANTINED',
+    'file_upload_sessions: PENDING/UPLOADED → CANCELLED',
+    'audit_logs.action_code=FILE_VIRUS_DETECTED',
+    '同一事务', '容量预留释放', '重复 complete',
+  ]) {
+    if (!virusSection.includes(contract)) {
+      throw new Error(`Virus quarantine is missing session-terminal contract: ${contract}`);
+    }
+  }
+  const authorizationSection = text.match(/^### 3\.1 [^\r\n]+\r?\n([\s\S]*?)(?=^### )/m)?.[1] ?? '';
+  if (!authorizationSection.includes('权限收回，停止新签名') || !authorizationSection.includes('受控访问代理')) {
+    throw new Error('Download authorization must stop new signatures after revocation');
+  }
+  const queueSection = text.match(/^### 4\.2 [^\r\n]+\r?\n([\s\S]*?)(?=^### )/m)?.[1] ?? '';
+  if (!queueSection.includes('指数退避加抖动') || !queueSection.includes('DLQ（死信观察）')) {
+    throw new Error('Worker retry and DLQ contract is incomplete');
+  }
+  const monitoringSection = text.match(/^## 6\. [^\r\n]+\r?\n([\s\S]*)$/m)?.[1] ?? '';
+  if (!monitoringSection.includes('签名拒绝率') || !monitoringSection.includes('预扣未结算金额')) {
+    throw new Error('File/job monitoring must cover authorization and unsettled credits');
+  }
   if (/\b(?:pets?|friends?|comments?|replies|blocks?|reports?)\b/i.test(text)) {
     throw new Error('File/job design contains an excluded v1 capability');
   }
@@ -686,6 +716,17 @@ function validateRoadmap(text, quiet = false) {
       }
     }
   }
+  const stageByNumber = new Map(stages.map((stage) => [stage[1], stage[2]]));
+  const stageSix = stageByNumber.get('6');
+  if (/\bPDF\b|data-exports|MEMORY_BOOK_PDF/.test(stageSix)) {
+    throw new Error('Stage 6 must defer PDF and data-export delivery to stage 7');
+  }
+  const stageSeven = stageByNumber.get('7');
+  for (const contract of ['MEMORY_BOOK_PDF Worker', '/data-exports', 'PDF 下载', 'PDF 在书版本变化时失败或重建']) {
+    if (!stageSeven.includes(contract)) {
+      throw new Error(`Stage 7 must own the complete PDF delivery contract: ${contract}`);
+    }
+  }
   if (/\b(?:pets?|friends?|comments?|replies|blocks?|reports?)\b/i.test(text)) {
     throw new Error('Roadmap contains an excluded v1 capability');
   }
@@ -697,6 +738,12 @@ function validateFileJobMutations(text) {
     ['missing checksum', /Missing file\/job contract: checksum/, (source) => source.replaceAll('checksum', 'digest')],
     ['missing closed lifecycle', /Missing file lifecycle state: QUARANTINED/, (source) => source.replaceAll('QUARANTINED', 'ISOLATED')],
     ['missing table closure', /closed table and state contract/, (source) => source.replace('不新增表或状态', '允许新增表或状态')],
+    ['missing no-overwrite condition', /immutable no-overwrite condition/, (source) => source.replaceAll('If-None-Match: *', 'If-Match: existing')],
+    ['terminal upload session can reauthorize', /Terminal upload sessions/, (source) => source.replace('已 complete/session 达终态后不得重新授权写入', '已 complete/session 达终态后可重新授权写入')],
+    ['virus leaves session open', /Virus quarantine is missing session-terminal contract: file_upload_sessions: PENDING\/UPLOADED → CANCELLED/, (source) => source.replace('file_upload_sessions: PENDING/UPLOADED → CANCELLED', 'file_upload_sessions: PENDING/UPLOADED → EXPIRED')],
+    ['revocation keeps signing', /Download authorization must stop new signatures/, (source) => source.replace('权限收回，停止新签名', '权限收回，继续签名')],
+    ['missing retry backoff', /Worker retry and DLQ contract is incomplete/, (source) => source.replace('指数退避加抖动', '固定立即重试')],
+    ['missing authorization monitoring', /File\/job monitoring must cover authorization and unsettled credits/, (source) => source.replace('签名拒绝率', '签名指标')],
   ];
   for (const [label, expectedError, mutate] of mutations) {
     const mutated = mutate(text);
@@ -710,6 +757,27 @@ function validateFileJobMutations(text) {
     throw new Error(`File/job validator accepted in-memory mutation: ${label}`);
   }
   console.log(`PASS: ${mutations.length} in-memory file/job mutations rejected`);
+}
+
+function validateRoadmapMutations(text) {
+  const mutations = [
+    ['stage 6 accepts PDF worker', /Stage 6 must defer PDF and data-export delivery to stage 7/, (source) => source.replace(
+      '实现书架、建册、来源引用、章节/页/补页编排、阅读进度与删除，保证来源权限变化不会通过书或产物泄露。',
+      '实现书架、建册、来源引用、章节/页/补页编排、阅读进度、PDF Worker 与删除，保证来源权限变化不会通过书或产物泄露。')],
+    ['stage 7 omits PDF download', /Stage 7 must own the complete PDF delivery contract: PDF 下载/, (source) => source.replaceAll('PDF 下载', '导出下载')],
+  ];
+  for (const [label, expectedError, mutate] of mutations) {
+    const mutated = mutate(text);
+    if (mutated === text) throw new Error(`Roadmap mutation fixture drifted: ${label}`);
+    try {
+      validateRoadmap(mutated, true);
+    } catch (error) {
+      if (expectedError.test(error.message)) continue;
+      throw new Error(`Roadmap mutation failed for the wrong reason (${label}): ${error.message}`);
+    }
+    throw new Error(`Roadmap validator accepted in-memory mutation: ${label}`);
+  }
+  console.log(`PASS: ${mutations.length} in-memory roadmap mutations rejected`);
 }
 const args = process.argv.slice(2);
 if (args.some((arg) => !['--focus=architecture-api', '--focus=database', '--focus=api-catalog', '--focus=file-jobs', '--focus=roadmap'].includes(arg)) || args.length > 1) {
@@ -735,6 +803,7 @@ for (const name of selectedDocs) {
   if (name === '06-后端开发实施路线.md') {
     const roadmap = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
     validateRoadmap(roadmap);
+    validateRoadmapMutations(roadmap);
   }
   if (!fs.existsSync(file)) throw new Error(`Missing backend doc: ${name}`);
   const text = fs.readFileSync(file, 'utf8');
