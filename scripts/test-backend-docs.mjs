@@ -637,12 +637,88 @@ function validateApiCatalogMutations(text) {
   }
   console.log(`PASS: ${mutations.length} in-memory API catalog mutations rejected`);
 }
+const requiredFileJobContracts = [
+  'authorize → PUT → complete', 'signed URL', 'checksum', 'object_key',
+  'PENDING', 'PROCESSING', 'SUCCEEDED', 'FAILED', 'CANCELLED', 'Idempotency-Key',
+  'BullMQ', 'DLQ', '病毒', '缩略图', '来源链权限', '预扣', 'SETTLE', 'RELEASE',
+  '可靠补投', '引用计数', '延迟删除',
+];
+const requiredRoadmapContracts = [
+  '当前 App 代码不改', '旧 Supabase 分支暂留', '用户后续手删',
+  '先搭 NestJS 后端再逐模块替换客户端', '最终完全移除 Supabase',
+  '大陆部署', '对象存储', '短信', '观测', '可替换',
+];
+
+function validateFileJobs(text, quiet = false) {
+  for (const contract of requiredFileJobContracts) {
+    if (!text.includes(contract)) throw new Error(`Missing file/job contract: ${contract}`);
+  }
+  for (const state of ['UPLOADING', 'READY', 'QUARANTINED', 'DELETE_PENDING', 'DELETED',
+    'UPLOADED', 'COMPLETED', 'EXPIRED']) {
+    if (!text.includes(state)) throw new Error(`Missing file lifecycle state: ${state}`);
+  }
+  if (!/api_jobs.*async_jobs|ai_jobs.*async_jobs/.test(text)) {
+    throw new Error('File/job design must distinguish ai_jobs from async_jobs');
+  }
+  if (!/不新增(?:表|状态)/.test(text)) {
+    throw new Error('File/job design must state the closed table and state contract');
+  }
+  if (/\b(?:pets?|friends?|comments?|replies|blocks?|reports?)\b/i.test(text)) {
+    throw new Error('File/job design contains an excluded v1 capability');
+  }
+  if (!quiet) console.log('PASS: file lifecycle, authorization, worker reliability, settlement and cleanup contracts');
+}
+
+function validateRoadmap(text, quiet = false) {
+  for (const contract of requiredRoadmapContracts) {
+    if (!text.includes(contract)) throw new Error(`Missing roadmap delivery contract: ${contract}`);
+  }
+  const stages = [...text.matchAll(/^## 阶段 ([0-8])：[^\r\n]+\r?\n([\s\S]*?)(?=^## 阶段 |(?![\s\S]))/gm)];
+  if (stages.length !== 9 || stages.some((stage, index) => Number(stage[1]) !== index)) {
+    throw new Error('Roadmap must contain exactly stages 0 through 8 in order');
+  }
+  const headings = ['目标', '产物', '前置依赖', 'NestJS 模块', 'API', '数据表', '迁移',
+    '单元测试', '集成测试', '端到端测试', '运维验证', '完成标准', '本阶段不做事项', '回滚/退出'];
+  for (const stage of stages) {
+    for (const heading of headings) {
+      if (!new RegExp(`^### ${heading}$`, 'm').test(stage[2])) {
+        throw new Error(`Stage ${stage[1]} missing required section: ${heading}`);
+      }
+    }
+  }
+  if (/\b(?:pets?|friends?|comments?|replies|blocks?|reports?)\b/i.test(text)) {
+    throw new Error('Roadmap contains an excluded v1 capability');
+  }
+  if (!quiet) console.log('PASS: 0-8 delivery roadmap, gates, rollback and closed v1 scope');
+}
+
+function validateFileJobMutations(text) {
+  const mutations = [
+    ['missing checksum', /Missing file\/job contract: checksum/, (source) => source.replaceAll('checksum', 'digest')],
+    ['missing closed lifecycle', /Missing file lifecycle state: QUARANTINED/, (source) => source.replaceAll('QUARANTINED', 'ISOLATED')],
+    ['missing table closure', /closed table and state contract/, (source) => source.replace('不新增表或状态', '允许新增表或状态')],
+  ];
+  for (const [label, expectedError, mutate] of mutations) {
+    const mutated = mutate(text);
+    if (mutated === text) throw new Error(`File/job mutation fixture drifted: ${label}`);
+    try {
+      validateFileJobs(mutated, true);
+    } catch (error) {
+      if (expectedError.test(error.message)) continue;
+      throw new Error(`File/job mutation failed for the wrong reason (${label}): ${error.message}`);
+    }
+    throw new Error(`File/job validator accepted in-memory mutation: ${label}`);
+  }
+  console.log(`PASS: ${mutations.length} in-memory file/job mutations rejected`);
+}
 const args = process.argv.slice(2);
-if (args.some((arg) => !['--focus=architecture-api', '--focus=database', '--focus=api-catalog'].includes(arg)) || args.length > 1) {
-  throw new Error('Usage: node scripts/test-backend-docs.mjs [--focus=architecture-api|--focus=database|--focus=api-catalog]');
+if (args.some((arg) => !['--focus=architecture-api', '--focus=database', '--focus=api-catalog', '--focus=file-jobs', '--focus=roadmap'].includes(arg)) || args.length > 1) {
+  throw new Error('Usage: node scripts/test-backend-docs.mjs [--focus=architecture-api|--focus=database|--focus=api-catalog|--focus=file-jobs|--focus=roadmap]');
 }
 const selectedDocs = args[0] === '--focus=database' ? ['03-数据库设计.md'] :
-  args[0] === '--focus=api-catalog' ? ['04-模块API清单.md'] : args.length ? Object.keys(requiredContent) : docs;
+  args[0] === '--focus=api-catalog' ? ['04-模块API清单.md'] :
+  args[0] === '--focus=file-jobs' ? ['05-文件与异步任务.md'] :
+  args[0] === '--focus=roadmap' ? ['06-后端开发实施路线.md'] : args.length ? Object.keys(requiredContent) : docs;
 for (const name of selectedDocs) {
   const file = path.join(dir, name);
   if (name === '03-数据库设计.md') validateDatabase(fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '');
@@ -650,6 +726,15 @@ for (const name of selectedDocs) {
     const apiCatalog = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
     validateApiCatalog(apiCatalog);
     validateApiCatalogMutations(apiCatalog);
+  }
+  if (name === '05-文件与异步任务.md') {
+    const fileJobs = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
+    validateFileJobs(fileJobs);
+    validateFileJobMutations(fileJobs);
+  }
+  if (name === '06-后端开发实施路线.md') {
+    const roadmap = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
+    validateRoadmap(roadmap);
   }
   if (!fs.existsSync(file)) throw new Error(`Missing backend doc: ${name}`);
   const text = fs.readFileSync(file, 'utf8');
