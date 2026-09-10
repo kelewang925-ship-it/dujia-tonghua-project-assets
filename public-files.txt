@@ -1,10 +1,10 @@
 .github/workflows/pages.yml
 .gitignore
 .nojekyll
-.superpowers/sdd/2026-09-08-后端资料与公开页面实施计划/task-5-report.md
-.superpowers/sdd/2026-09-08-后端资料与公开页面实施计划/task-7-report.md
 01-项目总览/项目介绍.md
 02-产品与功能/产品结构.md
+02-产品与功能/情侣宠物模块/《独家童话》3D宠物模块设计与开发方案.md
+02-产品与功能/情侣宠物模块/《独家童话》情侣宠物沉浸式页面新版设计思路.md
 02-产品与功能/所有页面功能清单.md
 03-UI与设计系统/《独家童话》Design System v1.0.md
 05-图片资产与生成/独家童话-App图标-当前选定版.png
