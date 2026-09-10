@@ -48,3 +48,36 @@ PASS: 122 tracked public files; 109 recursive local HTML references; no path esc
 - 所有公开本地 HTML 引用均会在构建和校验阶段递归检查，且路径无法逃离仓库根目录。
 - 后端页面的原始资料链接均由回归测试覆盖。
 - 未改 App 仓库或主分支内容；改动限定于资料工作树、公开页和发布校验闭环。
+
+## 修复轮 1：任意 Windows 绝对路径
+
+- 通过 `git show HEAD:.nojekyll` 确认该文件的 HEAD 内容为空，并以补丁方式恢复被误删的空文件；恢复后不再出现在 Git 差异中。
+- `scripts/verify-public-site.ps1` 现拒绝任意有盘符的 Windows 路径，以及合法主机名和共享名形式的 UNC 路径；驱动器匹配要求前方不是字母或数字，避免把 URL 协议尾部误报。相对路径和 API 路由仍保持原规则。
+- 负向回归：使用补丁临时向 `README.md` 注入两个不同盘符的绝对路径及一个 UNC 共享路径，然后运行下列命令；验证器按预期失败，随后以补丁移除样例，未留下 README 差异。
+
+```text
+> powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-public-site.ps1
+Local absolute path in public file: README.md
+```
+
+## 修复轮 1 实际验证输出
+
+```text
+> node scripts/test-showcase.mjs
+PASS: all 8 module links jump to and filter the gallery
+
+> node scripts/test-backend-design.mjs
+PASS: 7 modules, 151 API entries, 54 table entries
+
+> node scripts/test-backend-docs.mjs
+PASS: 7 backend documents are present and satisfy required content
+
+> powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-public-manifest.ps1
+Generated public-files.txt with 122 tracked files and 109 recursive local HTML references.
+
+> powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-public-site.ps1
+PASS: 122 tracked public files; 109 recursive local HTML references; no path escape, missing file, unexpected tracked file, local absolute path, or secret pattern.
+
+> git diff --check
+(no output; passed)
+```

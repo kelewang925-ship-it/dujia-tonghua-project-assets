@@ -80,7 +80,7 @@ if (Test-Path -LiteralPath (Join-Path $rootFull '.git')) {
 
 $textFiles = $manifest | Where-Object { [IO.Path]::GetExtension($_) -in @('.html', '.md', '.mmd', '.json', '.yml', '.yaml', '.ps1', '.mjs', '') }
 $secretPattern = '(ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|SUPABASE_(?:ANON_KEY|SERVICE_ROLE_KEY)\s*[:=]\s*[^\s]+)'
-$absolutePathPattern = '(?:(?i:[A-Z]:[\\/](?:Users|projectCode)(?:[\\/]|$))|/(?:Users|home|mnt|workspace)(?:/|$))'
+$absolutePathPattern = '(?:(?<![A-Za-z0-9])(?i:[A-Z]:[\\/])|\\\\[A-Za-z0-9._-]+[\\/][A-Za-z0-9._$ -]+|/(?:Users|home|mnt|workspace)(?:/|$))'
 foreach ($path in $textFiles) {
   $value = Get-Content -LiteralPath (Join-Path $rootFull $path) -Raw -Encoding UTF8
   if ($value -match $secretPattern) { throw "Potential secret in public file: $path" }
