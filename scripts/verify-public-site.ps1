@@ -31,6 +31,7 @@ function Get-DirectHtmlReferences {
   param([string]$HtmlFile)
 
   $html = Get-Content -LiteralPath (Join-Path $rootFull $HtmlFile) -Raw -Encoding UTF8
+  $html = $html -replace '(?is)(<script\b[^>]*>).*?</script>', '$1</script>'
   [regex]::Matches($html, '(?:src|href)="([^"]+)"') |
     ForEach-Object { ConvertTo-LocalPath $_.Groups[1].Value $HtmlFile } |
     Where-Object { $_ } |

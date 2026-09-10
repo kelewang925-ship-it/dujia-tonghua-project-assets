@@ -11,19 +11,28 @@ assert.ok(fs.existsSync(page), 'backend-design.html does not exist');
 const html = fs.readFileSync(page, 'utf8');
 
 const sourceDocuments = [
-  '06-技术与开发/后端设计/README.md',
-  '06-技术与开发/后端设计/01-总体架构.md',
-  '06-技术与开发/后端设计/02-API通用规范.md',
-  '06-技术与开发/后端设计/03-数据库设计.md',
-  '06-技术与开发/后端设计/04-模块API清单.md',
-  '06-技术与开发/后端设计/05-文件与异步任务.md',
-  '06-技术与开发/后端设计/06-后端开发实施路线.md',
-  '06-技术与开发/后端设计/2026-09-08-Node后端架构与API数据设计规格.md',
-  '06-技术与开发/后端设计/2026-09-08-后端资料与公开页面实施计划.md',
+  ['overview', '06-技术与开发/后端设计/README.md'],
+  ['architecture', '06-技术与开发/后端设计/01-总体架构.md'],
+  ['api-guide', '06-技术与开发/后端设计/02-API通用规范.md'],
+  ['database', '06-技术与开发/后端设计/03-数据库设计.md'],
+  ['api-catalog', '06-技术与开发/后端设计/04-模块API清单.md'],
+  ['files-jobs', '06-技术与开发/后端设计/05-文件与异步任务.md'],
+  ['roadmap', '06-技术与开发/后端设计/06-后端开发实施路线.md'],
+  ['specification', '06-技术与开发/后端设计/2026-09-08-Node后端架构与API数据设计规格.md'],
+  ['delivery-plan', '06-技术与开发/后端设计/2026-09-08-后端资料与公开页面实施计划.md'],
 ];
-for (const document of sourceDocuments) {
-  assert.match(html, new RegExp(`href="${document}"`), `missing visible source-document link: ${document}`);
+for (const [id, document] of sourceDocuments) {
+  assert.match(html, new RegExp(`href="backend-docs\\.html\\?doc=${id}"[^>]*target="_blank"[^>]*rel="noopener noreferrer"`), `source document must open the reader in a new tab: ${document}`);
 }
+
+const readerPage = path.join(root, 'backend-docs.html');
+assert.ok(fs.existsSync(readerPage), 'backend-docs.html does not exist');
+const readerHtml = fs.readFileSync(readerPage, 'utf8');
+for (const [id, document] of sourceDocuments) {
+  assert.match(readerHtml, new RegExp(`"${id}"[^}]*"path":"${document}"`), `reader must map ${id} to ${document}`);
+}
+assert.match(readerHtml, /fetch\(documentInfo\.path\)/, 'reader must load the selected Markdown source');
+assert.match(readerHtml, /marked|renderMarkdown/, 'reader must render Markdown as readable HTML');
 
 for (const selector of [
   'data-api-item', 'data-table-item', 'data-module-filter', 'data-method-filter', 'data-search', 'data-stage',
