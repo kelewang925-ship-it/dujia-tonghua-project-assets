@@ -68,6 +68,41 @@ function loadViewerLogic() {
 
 const apiCatalog = extractCatalog('API_CATALOG');
 const tableCatalog = extractCatalog('TABLE_CATALOG');
+const databaseDesign = fs.readFileSync(path.join(root, '06-技术与开发/后端设计/03-数据库设计.md'), 'utf8');
+
+function parseDatabaseTableContracts(markdown) {
+  const headings = [...markdown.matchAll(/^### `([a-z][a-z0-9_]*)`\s*$/gm)];
+  return new Map(headings.map((heading, index) => {
+    const section = markdown.slice(heading.index, headings[index + 1]?.index ?? markdown.length);
+    const rows = section.split(/\r?\n/).filter((line) => line.startsWith('|')).slice(2).map((line) =>
+      line.slice(1, -1).split('|').map((cell) => cell.trim()));
+    const fields = rows.map(([field, type, nullable, defaultValue, constraint, description]) => ({
+      field: field.replaceAll('`', ''), type, nullable, defaultValue, constraint, description,
+    }));
+    const metadata = (label) => section.match(new RegExp(`${label}([^。]+)`))?.[1] ?? '';
+    return [heading[1], {
+      fields,
+      primaryKey: fields.filter((field) => /\bPK\b/.test(field.constraint)).map((field) => field.field).join(', '),
+      foreignKeys: fields.filter((field) => field.constraint.includes('FK →')).map((field) => `${field.field}: ${field.constraint}`).join('；') || '无',
+      unique: metadata('唯一约束：'),
+      indexes: metadata('索引：'),
+      lifecycle: metadata('删除/保留：'),
+    }];
+  }));
+}
+
+const databaseContracts = parseDatabaseTableContracts(databaseDesign);
+assert.equal(databaseContracts.size, 54, 'database source must provide one contract for every public table');
+for (const table of tableCatalog) {
+  const source = databaseContracts.get(table.name);
+  assert.ok(source, `public table is absent from database source: ${table.name}`);
+  for (const key of ['fields', 'primaryKey', 'foreignKeys', 'unique', 'indexes', 'lifecycle']) {
+    assert.deepEqual(table[key], source[key], `public ${key} drifted from database source: ${table.name}`);
+  }
+  for (const key of ['unique', 'indexes', 'lifecycle']) {
+    assert.notEqual(table[key], '无', `public ${key} must not use a fabricated placeholder: ${table.name}`);
+  }
+}
 const users = tableCatalog.find((table) => table.name === 'users');
 assert.ok(users, 'users table fixture must exist');
 const legacyTableSearchText = Object.values(users).flat().join(' ');
@@ -85,8 +120,20 @@ assert.equal(viewer.parseHashTarget('#api-0'), 'api-0', 'API hash must resolve t
 assert.equal(viewer.parseHashTarget('#table-53'), 'table-53', 'table hash must resolve to a stable card id');
 assert.equal(viewer.parseHashTarget('#not-a-card'), '', 'unknown hashes must not target arbitrary nodes');
 
-for (const excluded of ['宠物', '好友', '公开评论', '拉黑', '举报', '/pets']) {
-  assert.ok(!html.includes(excluded), `excluded scope leaked into page: ${excluded}`);
+const excludedScope = html.match(/<section[^>]*id="excluded-scope"[\s\S]*?<\/section>/);
+assert.ok(excludedScope, 'page must publish an explicit excluded-scope section');
+for (const excluded of ['宠物', '好友关系', '公开作品可见性', '公开评论/回复', '拉黑', '举报']) {
+  assert.match(excludedScope[0], new RegExp(excluded), `excluded-scope section must name ${excluded}`);
 }
+const executablePage = html.replace(excludedScope[0], '');
+for (const excluded of ['宠物', '好友关系', '公开作品', '公开评论', '回复', '拉黑', '举报']) {
+  assert.ok(!executablePage.includes(excluded), `excluded scope leaked outside its explanation: ${excluded}`);
+}
+for (const pattern of [
+  /\/api\/v1\/(?:pets?|friends?|comments?|replies|blocks?|reports?)(?:[/{?"'])/i,
+  /"name":"(?:pet|friend|public|comment|reply|block|report)[a-z_]*"/i,
+  /"moduleName":"[^"\\]*(?:宠物|好友|公开评论|拉黑|举报)/,
+  /(?:PUBLIC|FRIENDS|FRIEND|PET)\//,
+]) assert.doesNotMatch(executablePage, pattern, `excluded capability leaked into executable catalog: ${pattern}`);
 
 console.log(`PASS: 7 modules, ${apiCount} API entries, ${tableCount} table entries`);

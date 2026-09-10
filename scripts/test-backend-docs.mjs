@@ -92,6 +92,7 @@ function validateDatabase(text) {
     heading[1],
     text.slice(heading.index, headings[index + 1]?.index ?? text.length),
   ]));
+  const tableFields = new Map();
   const databaseOverview = text.slice(0, headings[0]?.index ?? text.length);
   for (const table of expectedTables) {
     if (!tableNames.includes(table)) throw new Error(`Missing backend table: ${table}`);
@@ -129,6 +130,7 @@ function validateDatabase(text) {
       throw new Error(`Missing six-column field dictionary: ${table}`);
     }
     const fields = rows.slice(2).map((line) => line.slice(1, -1).split('|').map((cell) => cell.trim()));
+    tableFields.set(table, fields);
     if (fields.length < 3) throw new Error(`Incomplete field dictionary: ${table}`);
     const names = new Set();
     for (const cells of fields) {
@@ -199,16 +201,23 @@ function validateDatabase(text) {
       softDeleteOrderingColumns.some((mapping) => !databaseOverview.includes(mapping))) {
     throw new Error('Soft-delete ordering DDL must name each table\'s actual parent column');
   }
-  const requiredForeignKeyIndexes = {
-    ai_jobs: ['draft_id'],
-    subscriptions: ['plan_id'],
-    notifications: ['couple_id'],
-  };
-  for (const [table, fields] of Object.entries(requiredForeignKeyIndexes)) {
-    const indexText = tableSections.get(table).match(/索引：([^。]+)/)?.[1] ?? '';
-    const indexSpecs = indexText.split('、').map((spec) => spec.trim());
-    for (const field of fields) {
-      if (!indexSpecs.some((spec) => spec === field || new RegExp(`^\\(${field}(?:,|\\))`).test(spec))) {
+  function hasForeignKeyLeftPrefix(table, field, constraint) {
+    if (/\bPK\b/.test(constraint) && !/组成/.test(constraint)) return true;
+    const section = tableSections.get(table);
+    const metadata = [
+      section.match(/唯一约束：([^。]+)/)?.[1] ?? '',
+      section.match(/索引：([^。]+)/)?.[1] ?? '',
+    ].join(' ').replaceAll('`', '').trim();
+    const escapedField = field.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`(?:^|[（(、；])${escapedField}(?=\\s*(?:[,，、；)）]|唯一|主键|WHERE|对|在|$|/))`).test(metadata) ||
+      new RegExp(`(?:^|[\\s/])${escapedField}(?=\\s*(?:[,，、；]|唯一|WHERE|对|在|建|仅|$|/))`).test(metadata);
+  }
+  for (const table of expectedTables) {
+    for (const cells of tableFields.get(table)) {
+      const [name, , , , constraint] = cells;
+      if (!constraint.includes('FK →')) continue;
+      const field = name.slice(1, -1);
+      if (!hasForeignKeyLeftPrefix(table, field, constraint)) {
         throw new Error(`Missing left-prefix B-tree index for foreign key: ${table}.${field}`);
       }
     }
