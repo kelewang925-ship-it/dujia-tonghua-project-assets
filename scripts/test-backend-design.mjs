@@ -50,6 +50,8 @@ assert.match(html, /aria-pressed/, 'filters must expose their pressed state');
 assert.match(html, /aria-expanded[\s\S]*aria-controls/, 'disclosures must expose their state and controlled content');
 assert.match(html, /location\.hash[\s\S]*hashchange/, 'deep links must use URL hashes');
 assert.match(html, /prefers-reduced-motion/, 'motion must respect reduced-motion preferences');
+assert.match(html, /\.browser\s*\{\s*display:grid;\s*grid-template-columns:1fr;/, 'API and table browsers must use a single-column reading layout');
+assert.doesNotMatch(html, /\.browser\s*\{[^}]*repeat\(auto-fit/, 'API and table browsers must not restore multi-column auto-fit cards');
 
 function extractCatalog(name) {
   const match = html.match(new RegExp(`const ${name} = (.*);`));
