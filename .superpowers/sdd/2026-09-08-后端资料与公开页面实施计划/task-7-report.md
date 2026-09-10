@@ -81,3 +81,21 @@ PASS: 122 tracked public files; 109 recursive local HTML references; no path esc
 > git diff --check
 (no output; passed)
 ```
+
+## 修复轮 2：单字母 URL scheme
+
+- 盘符正斜杠分支现在要求后方不是第二个正斜杠；反斜杠盘符和 UNC 分支不变。因此 URL scheme 不会被作为本地绝对路径误报。
+- 使用 PowerShell 的实际正则断言确认：`x://example.test/path` 与 HTTPS URL 均不匹配；反斜杠盘符、正斜杠盘符、第二个盘符和 UNC 路径均匹配；相对路径及 `/users/profile` API 路径不匹配。
+- 保留临时 README 注入回归并补入正斜杠盘符样例。验证器实际输出 `Local absolute path in public file: README.md`；随即通过补丁移除临时文本，未留下 README 差异。
+
+```text
+> PowerShell regex assertions
+PASS: single-letter URL -> False
+PASS: HTTPS URL -> False
+PASS: backslash drive path -> True
+PASS: slash drive path -> True
+PASS: second drive path -> True
+PASS: UNC path -> True
+PASS: relative path -> False
+PASS: API path -> False
+```
