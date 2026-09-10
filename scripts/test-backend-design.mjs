@@ -33,6 +33,8 @@ for (const [id, document] of sourceDocuments) {
 }
 assert.match(readerHtml, /fetch\(documentInfo\.path\)/, 'reader must load the selected Markdown source');
 assert.match(readerHtml, /marked|renderMarkdown/, 'reader must render Markdown as readable HTML');
+assert.match(readerHtml, /resolveMarkdownLink/, 'reader must resolve relative links from the selected Markdown source directory');
+assert.match(readerHtml, /renderMarkdown\(markdown, documentInfo\.path\)/, 'reader must render each document with its source path');
 
 for (const selector of [
   'data-api-item', 'data-table-item', 'data-module-filter', 'data-method-filter', 'data-search', 'data-stage',
