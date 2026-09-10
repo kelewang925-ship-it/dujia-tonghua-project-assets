@@ -35,6 +35,10 @@ assert.match(readerHtml, /fetch\(documentInfo\.path\)/, 'reader must load the se
 assert.match(readerHtml, /marked|renderMarkdown/, 'reader must render Markdown as readable HTML');
 assert.match(readerHtml, /resolveMarkdownLink/, 'reader must resolve relative links from the selected Markdown source directory');
 assert.match(readerHtml, /renderMarkdown\(markdown, documentInfo\.path\)/, 'reader must render each document with its source path');
+assert.match(readerHtml, /data-current-document/, 'reader must display the current document title in the top navigation');
+assert.match(readerHtml, /data-document-menu/, 'reader must expose a dedicated document-directory menu');
+assert.match(readerHtml, /document-menu__item--current/, 'reader must visibly mark the active document in its directory');
+assert.doesNotMatch(readerHtml, /data-document-select/, 'reader must not use the raw document select as its primary navigation');
 
 for (const selector of [
   'data-api-item', 'data-table-item', 'data-module-filter', 'data-method-filter', 'data-search', 'data-stage',
